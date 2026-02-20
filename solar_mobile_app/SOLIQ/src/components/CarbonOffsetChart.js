@@ -1,21 +1,70 @@
-import React from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
-import Svg, { Path, Polyline, Line, Circle, Defs, LinearGradient, Stop } from 'react-native-svg';
+import React, { useState, useRef } from 'react';
+import { View, Text, StyleSheet, Dimensions, PanResponder, Animated } from 'react-native';
+import Svg, { Path, Line, Circle, Defs, LinearGradient, Stop, G } from 'react-native-svg';
 
 const { width } = Dimensions.get('window');
 const CHART_WIDTH = width - 70;
 const CHART_HEIGHT = 120;
 
 const CarbonOffsetChart = () => {
+    const [activePoint, setActivePoint] = useState(null);
+    const tooltipOpacity = useRef(new Animated.Value(0)).current;
+    const tooltipX = useRef(new Animated.Value(0)).current;
+
     // Sample data points for the line chart (normalized for height)
     const data = [
-        { x: 0, y: 30 },
-        { x: 50, y: 70 },
-        { x: 100, y: 60 },
-        { x: 150, y: 40 },
-        { x: 200, y: 20 },
-        { x: 250, y: 30 },
+        { label: 'Jan', value: 300, x: 0, y: 30 },
+        { label: 'Mar', value: 470, x: (CHART_WIDTH / 5) * 1, y: 70 },
+        { label: 'May', value: 410, x: (CHART_WIDTH / 5) * 2, y: 60 },
+        { label: 'Jul', value: 350, x: (CHART_WIDTH / 5) * 3, y: 40 },
+        { label: 'Sep', value: 280, x: (CHART_WIDTH / 5) * 4, y: 20 },
+        { label: 'Dec', value: 320, x: CHART_WIDTH, y: 30 },
     ];
+
+    const findClosestPoint = (touchX) => {
+        const xStep = CHART_WIDTH / (data.length - 1);
+        const index = Math.round(touchX / xStep);
+        if (index >= 0 && index < data.length) {
+            return { ...data[index], index };
+        }
+        return null;
+    };
+
+    const panResponder = useRef(
+        PanResponder.create({
+            onStartShouldSetPanResponder: () => true,
+            onMoveShouldSetPanResponder: () => true,
+            onPanResponderGrant: (evt) => {
+                const { locationX } = evt.nativeEvent;
+                const point = findClosestPoint(locationX);
+                if (point) {
+                    setActivePoint(point);
+                    Animated.parallel([
+                        Animated.timing(tooltipOpacity, { toValue: 1, duration: 200, useNativeDriver: true }),
+                        Animated.spring(tooltipX, { toValue: point.x, friction: 8, tension: 40, useNativeDriver: true }),
+                    ]).start();
+                }
+            },
+            onPanResponderMove: (evt) => {
+                const { locationX } = evt.nativeEvent;
+                const point = findClosestPoint(locationX);
+                if (point) {
+                    setActivePoint(point);
+                    Animated.spring(tooltipX, { toValue: point.x, friction: 8, tension: 40, useNativeDriver: true }).start();
+                }
+            },
+            onPanResponderRelease: () => {
+                Animated.timing(tooltipOpacity, { toValue: 0, duration: 200, useNativeDriver: true }).start(() => {
+                    setActivePoint(null);
+                });
+            },
+            onPanResponderTerminate: () => {
+                Animated.timing(tooltipOpacity, { toValue: 0, duration: 200, useNativeDriver: true }).start(() => {
+                    setActivePoint(null);
+                });
+            },
+        })
+    ).current;
 
     // Scale data to fit chart area
     const pathData = data.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${CHART_HEIGHT - p.y}`).join(' ');
@@ -38,7 +87,7 @@ const CarbonOffsetChart = () => {
                     <Text style={styles.axisLabel}>0</Text>
                 </View>
 
-                <View style={styles.svgContainer}>
+                <View style={styles.svgContainer} {...panResponder.panHandlers}>
                     <Svg height={CHART_HEIGHT} width={CHART_WIDTH}>
                         <Defs>
                             <LinearGradient id="gradient" x1="0" y1="0" x2="0" y2="1">
@@ -65,7 +114,43 @@ const CarbonOffsetChart = () => {
                             stroke="#4CAF50"
                             strokeWidth="2"
                         />
+
+                        {activePoint && (
+                            <G>
+                                <Line
+                                    x1={activePoint.x}
+                                    y1="0"
+                                    x2={activePoint.x}
+                                    y2={CHART_HEIGHT}
+                                    stroke="#4CAF50"
+                                    strokeWidth="1"
+                                    strokeDasharray="4 2"
+                                />
+                                <Circle
+                                    cx={activePoint.x}
+                                    cy={CHART_HEIGHT - activePoint.y}
+                                    r="6"
+                                    fill="#4CAF50"
+                                    stroke="#fff"
+                                    strokeWidth="2"
+                                />
+                            </G>
+                        )}
                     </Svg>
+
+                    {activePoint && (
+                        <Animated.View style={[styles.tooltip, {
+                            opacity: tooltipOpacity,
+                            transform: [
+                                { translateX: Animated.subtract(tooltipX, 35) }
+                            ],
+                            left: 0, // We use translateX to move it
+                            top: Math.max(0, CHART_HEIGHT - activePoint.y - 50)
+                        }]}>
+                            <Text style={styles.tooltipValue}>{activePoint.value} kg</Text>
+                            <Text style={styles.tooltipLabel}>{activePoint.label}</Text>
+                        </Animated.View>
+                    )}
                 </View>
             </View>
 
@@ -125,6 +210,7 @@ const styles = StyleSheet.create({
     },
     svgContainer: {
         flex: 1,
+        position: 'relative',
     },
     xAxis: {
         flexDirection: 'row',
@@ -136,6 +222,29 @@ const styles = StyleSheet.create({
         fontSize: 10,
         color: '#BBB',
     },
+    tooltip: {
+        position: 'absolute',
+        backgroundColor: 'rgba(0,0,0,0.85)',
+        borderRadius: 8,
+        padding: 8,
+        alignItems: 'center',
+        width: 70,
+        zIndex: 100,
+        elevation: 5,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+    },
+    tooltipValue: {
+        color: '#fff',
+        fontSize: 12,
+        fontWeight: 'bold',
+    },
+    tooltipLabel: {
+        color: 'rgba(255,255,255,0.7)',
+        fontSize: 8,
+    }
 });
 
 export default CarbonOffsetChart;
