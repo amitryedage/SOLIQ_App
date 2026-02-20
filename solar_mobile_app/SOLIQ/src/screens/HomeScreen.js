@@ -1,8 +1,12 @@
 import React from 'react';
 import { StyleSheet, View, ScrollView, SafeAreaView, StatusBar } from 'react-native';
 import TopNavbar from '../components/TopNavbar';
+import EnergyHeader from '../components/EnergyHeader';
+import StatsBar from '../components/StatsBar';
+import TodayKhata from '../components/TodayKhata';
+import EnergyScore from '../components/EnergyScore';
 import ActionGrid from '../components/ActionGrid';
-
+import BottomNavbar from '../components/BottomNavbar';
 
 const HomeScreen = () => {
     return (
@@ -14,8 +18,8 @@ const HomeScreen = () => {
                 contentContainerStyle={styles.scrollContent}
                 showsVerticalScrollIndicator={false}
             >
-               
-               
+                <EnergyHeader />
+                <StatsBar />
                 <TodayKhata />
                 <EnergyScore />
                 <ActionGrid />
