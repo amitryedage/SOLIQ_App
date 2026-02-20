@@ -37,7 +37,7 @@ const BottomNavbar = ({ activeTab, onTabPress }) => {
                 <View style={styles.fabSpacer} />
 
                 <NavItem
-                    icon="shopping-cart"
+                    icon="cart"
                     iconType="Ionicons"
                     label="Market"
                     active={activeTab === 'market'}

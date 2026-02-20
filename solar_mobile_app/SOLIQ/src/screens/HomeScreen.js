@@ -7,6 +7,7 @@ import TodayKhata from '../components/TodayKhata';
 import EnergyScore from '../components/EnergyScore';
 import ActionGrid from '../components/ActionGrid';
 import BottomNavbar from '../components/BottomNavbar';
+import CarbonDashboard from '../components/CarbonDashboard';
 
 const HomeScreen = () => {
     const [activeTab, setActiveTab] = useState('home');
@@ -29,11 +30,7 @@ const HomeScreen = () => {
         }
 
         if (activeTab === 'carbon') {
-            return (
-                <View style={styles.placeholder}>
-                    <Text>Carbon Credits Dashboard (Coming Soon)</Text>
-                </View>
-            );
+            return <CarbonDashboard />;
         }
 
         return (
