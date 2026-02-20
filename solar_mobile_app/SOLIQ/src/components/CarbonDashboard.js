@@ -2,6 +2,8 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import CarbonMetricGrid from './CarbonMetricGrid';
 import ImpactCard from './ImpactCard';
+import CarbonOffsetChart from './CarbonOffsetChart';
+import CarbonEarningsChart from './CarbonEarningsChart';
 
 const CarbonDashboard = () => {
     return (
@@ -40,9 +42,8 @@ const CarbonDashboard = () => {
                 />
             </View>
 
-            <View style={styles.chartPlaceholder}>
-                <Text style={styles.placeholderText}>Charts coming in next phase (Phase 5)</Text>
-            </View>
+            <CarbonOffsetChart />
+            <CarbonEarningsChart />
         </ScrollView>
     );
 };
@@ -72,23 +73,6 @@ const styles = StyleSheet.create({
     impactContainer: {
         marginTop: 10,
     },
-    chartPlaceholder: {
-        height: 150,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginTop: 20,
-        marginHorizontal: 15,
-        borderWidth: 1,
-        borderColor: '#eee',
-        borderStyle: 'dashed',
-        borderRadius: 20,
-        backgroundColor: '#fafafa',
-    },
-    placeholderText: {
-        color: '#bbb',
-        fontStyle: 'italic',
-        fontSize: 12,
-    }
 });
 
 export default CarbonDashboard;

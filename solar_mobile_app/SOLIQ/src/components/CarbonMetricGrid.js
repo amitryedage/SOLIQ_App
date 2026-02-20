@@ -20,7 +20,7 @@ const CarbonMetricGrid = () => {
                     title="Carbon Credits"
                     value="122.8"
                     unit="credits"
-                    icon="coin"
+                    icon="hand-coin-outline"
                     iconType="MCI"
                     iconColor="#4FA7D8"
                     bgColor="#F0F7FF"
