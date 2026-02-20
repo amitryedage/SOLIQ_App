@@ -1,0 +1,104 @@
+import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { Ionicons, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+
+const NavItem = ({ icon, label, active, iconType }) => {
+    return (
+        <TouchableOpacity style={styles.navItem}>
+            {iconType === 'Ionicons' && <Ionicons name={icon} size={24} color={active ? '#4FA7D8' : '#999'} />}
+            {iconType === 'MCI' && <MaterialCommunityIcons name={icon} size={24} color={active ? '#4FA7D8' : '#999'} />}
+            {iconType === 'FA' && <FontAwesome5 name={icon} size={20} color={active ? '#4FA7D8' : '#999'} />}
+            <Text style={[styles.navLabel, active && styles.activeLabel]}>{label}</Text>
+        </TouchableOpacity>
+    );
+};
+
+const BottomNavbar = () => {
+    return (
+        <View style={styles.outerContainer}>
+            <View style={styles.container}>
+                <NavItem icon="home" iconType="Ionicons" label="Home" active={true} />
+                <NavItem icon="text-box-outline" iconType="MCI" label="Khata" />
+
+                {/* Space for FAB */}
+                <View style={styles.fabSpacer} />
+
+                <NavItem icon="shopping-cart" iconType="Ionicons" label="Market" />
+                <NavItem icon="bar-chart" iconType="Ionicons" label="Analytics" />
+            </View>
+
+            {/* Floating Action Button */}
+            <TouchableOpacity style={styles.fabContainer}>
+                <LinearGradient
+                    colors={['#FF8A65', '#EF5350']}
+                    style={styles.fab}
+                >
+                    <Ionicons name="add" size={32} color="#fff" />
+                </LinearGradient>
+            </TouchableOpacity>
+        </View>
+    );
+};
+
+const styles = StyleSheet.create({
+    outerContainer: {
+        position: 'absolute',
+        bottom: 0,
+        width: '100%',
+    },
+    container: {
+        flexDirection: 'row',
+        backgroundColor: '#fff',
+        paddingVertical: 10,
+        paddingHorizontal: 10,
+        borderTopWidth: 1,
+        borderTopColor: '#F0F0F0',
+        justifyContent: 'space-around',
+        alignItems: 'center',
+        paddingBottom: 25, // For notch support/safe area
+    },
+    navItem: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        flex: 1,
+    },
+    navLabel: {
+        fontSize: 10,
+        color: '#999',
+        marginTop: 4,
+    },
+    activeLabel: {
+        color: '#4FA7D8',
+        fontWeight: 'bold',
+    },
+    fabSpacer: {
+        flex: 1,
+    },
+    fabContainer: {
+        position: 'absolute',
+        top: -30,
+        left: '50%',
+        marginLeft: -30,
+        width: 60,
+        height: 60,
+        borderRadius: 30,
+        backgroundColor: '#fff', // White ring
+        justifyContent: 'center',
+        alignItems: 'center',
+        elevation: 8,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 5,
+    },
+    fab: {
+        width: 52,
+        height: 52,
+        borderRadius: 26,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+});
+
+export default BottomNavbar;
