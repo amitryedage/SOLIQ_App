@@ -1,5 +1,5 @@
-import React from 'react';
-import { StyleSheet, View, ScrollView, SafeAreaView, StatusBar } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, View, ScrollView, SafeAreaView, StatusBar, Text } from 'react-native';
 import TopNavbar from '../components/TopNavbar';
 import EnergyHeader from '../components/EnergyHeader';
 import StatsBar from '../components/StatsBar';
@@ -9,22 +9,46 @@ import ActionGrid from '../components/ActionGrid';
 import BottomNavbar from '../components/BottomNavbar';
 
 const HomeScreen = () => {
+    const [activeTab, setActiveTab] = useState('home');
+
+    const renderContent = () => {
+        if (activeTab === 'home') {
+            return (
+                <ScrollView
+                    style={styles.container}
+                    contentContainerStyle={styles.scrollContent}
+                    showsVerticalScrollIndicator={false}
+                >
+                    <EnergyHeader />
+                    <StatsBar />
+                    <TodayKhata />
+                    <EnergyScore />
+                    <ActionGrid />
+                </ScrollView>
+            );
+        }
+
+        if (activeTab === 'carbon') {
+            return (
+                <View style={styles.placeholder}>
+                    <Text>Carbon Credits Dashboard (Coming Soon)</Text>
+                </View>
+            );
+        }
+
+        return (
+            <View style={styles.placeholder}>
+                <Text>{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} Section</Text>
+            </View>
+        );
+    };
+
     return (
         <SafeAreaView style={styles.safeArea}>
             <StatusBar barStyle="dark-content" />
             <TopNavbar />
-            <ScrollView
-                style={styles.container}
-                contentContainerStyle={styles.scrollContent}
-                showsVerticalScrollIndicator={false}
-            >
-                <EnergyHeader />
-                <StatsBar />
-                <TodayKhata />
-                <EnergyScore />
-                <ActionGrid />
-            </ScrollView>
-            <BottomNavbar />
+            {renderContent()}
+            <BottomNavbar activeTab={activeTab} onTabPress={setActiveTab} />
         </SafeAreaView>
     );
 };
@@ -41,6 +65,12 @@ const styles = StyleSheet.create({
     scrollContent: {
         paddingBottom: 100, // Account for BottomNavbar
     },
+    placeholder: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#f8f9fa',
+    }
 });
 
 export default HomeScreen;

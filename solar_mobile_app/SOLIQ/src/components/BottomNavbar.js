@@ -3,9 +3,9 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 
-const NavItem = ({ icon, label, active, iconType }) => {
+const NavItem = ({ icon, label, active, iconType, onPress }) => {
     return (
-        <TouchableOpacity style={styles.navItem}>
+        <TouchableOpacity style={styles.navItem} onPress={onPress}>
             {iconType === 'Ionicons' && <Ionicons name={icon} size={24} color={active ? '#4FA7D8' : '#999'} />}
             {iconType === 'MCI' && <MaterialCommunityIcons name={icon} size={24} color={active ? '#4FA7D8' : '#999'} />}
             {iconType === 'FA' && <FontAwesome5 name={icon} size={20} color={active ? '#4FA7D8' : '#999'} />}
@@ -14,18 +14,42 @@ const NavItem = ({ icon, label, active, iconType }) => {
     );
 };
 
-const BottomNavbar = () => {
+const BottomNavbar = ({ activeTab, onTabPress }) => {
     return (
         <View style={styles.outerContainer}>
             <View style={styles.container}>
-                <NavItem icon="home" iconType="Ionicons" label="Home" active={true} />
-                <NavItem icon="text-box-outline" iconType="MCI" label="Khata" />
+                <NavItem
+                    icon="home"
+                    iconType="Ionicons"
+                    label="Home"
+                    active={activeTab === 'home'}
+                    onPress={() => onTabPress('home')}
+                />
+                <NavItem
+                    icon="text-box-outline"
+                    iconType="MCI"
+                    label="Khata"
+                    active={activeTab === 'khata'}
+                    onPress={() => onTabPress('khata')}
+                />
 
                 {/* Space for FAB */}
                 <View style={styles.fabSpacer} />
 
-                <NavItem icon="shopping-cart" iconType="Ionicons" label="Market" />
-                <NavItem icon="bar-chart" iconType="Ionicons" label="Analytics" />
+                <NavItem
+                    icon="shopping-cart"
+                    iconType="Ionicons"
+                    label="Market"
+                    active={activeTab === 'market'}
+                    onPress={() => onTabPress('market')}
+                />
+                <NavItem
+                    icon="leaf"
+                    iconType="FA"
+                    label="Carbon Credits"
+                    active={activeTab === 'carbon'}
+                    onPress={() => onTabPress('carbon')}
+                />
             </View>
 
             {/* Floating Action Button */}

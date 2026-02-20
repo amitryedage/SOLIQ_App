@@ -5,18 +5,29 @@ import { Ionicons } from '@expo/vector-icons';
 const TopNavbar = () => {
     return (
         <View style={styles.container}>
-            <TouchableOpacity>
-                <Ionicons name="menu-outline" size={28} color="#333" />
-            </TouchableOpacity>
-            
-            <Text style={styles.title}>Energy Khata</Text>
-            
-            <TouchableOpacity style={styles.notificationContainer}>
-                <Ionicons name="notifications-outline" size={26} color="#333" />
-                <View style={styles.badge}>
-                    <Text style={styles.badgeText}>2</Text>
+            <View style={styles.leftSection}>
+                <TouchableOpacity style={styles.menuButton}>
+                    <Ionicons name="menu-outline" size={28} color="#333" />
+                </TouchableOpacity>
+                <View style={styles.logoContainer}>
+                    <Ionicons name="sunny" size={24} color="#FBC02D" />
+                    <Text style={styles.title}>SolarIQ</Text>
                 </View>
-            </TouchableOpacity>
+            </View>
+
+            <View style={styles.rightSection}>
+                <TouchableOpacity style={styles.iconButton}>
+                    <Ionicons name="notifications" size={24} color="#333" />
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.avatarContainer}>
+                    <View style={styles.avatar}>
+                        <Text style={styles.avatarText}>A</Text>
+                    </View>
+                    <View style={styles.avatarBadge}>
+                        <Text style={styles.avatarBadgeText}>3</Text>
+                    </View>
+                </TouchableOpacity>
+            </View>
         </View>
     );
 };
@@ -27,23 +38,55 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
         paddingHorizontal: 20,
-        paddingVertical: 15,
+        paddingVertical: 10,
         backgroundColor: '#fff',
+    },
+    leftSection: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    menuButton: {
+        marginRight: 15,
+    },
+    logoContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
     },
     title: {
         fontSize: 18,
         fontWeight: 'bold',
         color: '#333',
+        marginLeft: 8,
     },
-    notificationContainer: {
+    rightSection: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    iconButton: {
+        marginRight: 15,
+    },
+    avatarContainer: {
         position: 'relative',
     },
-    badge: {
+    avatar: {
+        width: 32,
+        height: 32,
+        borderRadius: 16,
+        backgroundColor: '#4FA7D8',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    avatarText: {
+        color: '#fff',
+        fontSize: 14,
+        fontWeight: 'bold',
+    },
+    avatarBadge: {
         position: 'absolute',
-        top: -2,
-        right: -2,
+        top: -4,
+        right: -4,
         backgroundColor: '#FF4C4C',
-        borderRadius: 10,
+        borderRadius: 9,
         width: 18,
         height: 18,
         justifyContent: 'center',
@@ -51,7 +94,7 @@ const styles = StyleSheet.create({
         borderWidth: 2,
         borderColor: '#fff',
     },
-    badgeText: {
+    avatarBadgeText: {
         color: '#fff',
         fontSize: 10,
         fontWeight: 'bold',
