@@ -9,9 +9,10 @@ import ActionGrid from '../components/ActionGrid';
 import BottomNavbar from '../components/BottomNavbar';
 import CarbonDashboard from '../components/CarbonDashboard';
 import SubscriptionScreen from '../components/SubscriptionScreen';
+import KhataScreen from '../components/KhataScreen';
 
 const HomeScreen = () => {
-    const [activeTab, setActiveTab] = useState('subscription');
+    const [activeTab, setActiveTab] = useState('khata');
 
     const renderContent = () => {
         if (activeTab === 'home') {
@@ -36,6 +37,10 @@ const HomeScreen = () => {
 
         if (activeTab === 'subscription') {
             return <SubscriptionScreen />;
+        }
+
+        if (activeTab === 'khata') {
+            return <KhataScreen />;
         }
 
         return (
