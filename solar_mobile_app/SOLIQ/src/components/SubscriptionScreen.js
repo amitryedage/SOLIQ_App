@@ -106,7 +106,11 @@ const SubscriptionScreen = () => {
                     <TouchableOpacity style={styles.backButton}>
                         <Ionicons name="arrow-back" size={24} color="#1A1A1A" />
                     </TouchableOpacity>
-                    <Text style={styles.headerTitle}>SolarIQ Premium</Text>
+                    <Text style={styles.headerTitle}>
+                        <Text style={{ color: '#F4B13E' }}>SOL</Text>
+                        <Text style={{ color: '#4285B4' }}>IQ</Text>
+                        <Text style={{ color: '#0F172A' }}> Premium</Text>
+                    </Text>
                     <TouchableOpacity style={styles.themeButton}>
                         <Ionicons name="diamond-outline" size={22} color="#F59E0B" />
                     </TouchableOpacity>
