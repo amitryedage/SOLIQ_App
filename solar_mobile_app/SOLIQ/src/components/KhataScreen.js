@@ -2,6 +2,8 @@ import React from 'react';
 import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import KhataEnergyChart from './KhataEnergyChart';
+import KhataBillingHistory from './KhataBillingHistory';
 
 const KhataScreen = () => {
     const insets = useSafeAreaInsets();
@@ -46,7 +48,11 @@ const KhataScreen = () => {
                     </View>
                 </View>
 
-                {/* Content will go here in Phase 3 */}
+                {/* Energy Chart Component */}
+                <KhataEnergyChart />
+
+                {/* Billing History Section */}
+                <KhataBillingHistory />
 
             </ScrollView>
         </View>
