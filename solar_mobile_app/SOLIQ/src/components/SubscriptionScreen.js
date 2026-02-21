@@ -363,6 +363,57 @@ const styles = StyleSheet.create({
         fontSize: 12,
         color: '#888',
         fontWeight: '600',
+    },
+
+    // Independence Card Styles
+    independenceCard: {
+        borderRadius: 20,
+        padding: 20,
+        marginBottom: 20,
+        elevation: 2,
+        shadowColor: '#AB47BC',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.15,
+        shadowRadius: 10,
+    },
+    independenceIcon: {
+        marginBottom: 10,
+    },
+    independencePlanName: {
+        fontSize: 22,
+        fontWeight: 'bold',
+        color: '#1A1A1A',
+        marginBottom: 5,
+    },
+    independencePriceText: {
+        fontSize: 14,
+        color: '#D81B60', // Deep pink/purple
+        fontWeight: '600',
+        marginBottom: 20,
+    },
+    independencePriceAmount: {
+        fontSize: 24,
+        fontWeight: 'bold',
+    },
+    upgradeBtnContainer: {
+        width: '100%',
+        borderRadius: 12,
+        overflow: 'hidden',
+        elevation: 3,
+        shadowColor: '#F57C00',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+    },
+    upgradeBtn: {
+        paddingVertical: 14,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    upgradeBtnText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: 'bold',
     }
 });
 
