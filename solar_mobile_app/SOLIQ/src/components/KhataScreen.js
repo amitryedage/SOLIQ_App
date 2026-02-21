@@ -48,7 +48,34 @@ const KhataScreen = () => {
                     <Text style={styles.pageSubtitle}>Monthly billing & savings overview</Text>
                 </View>
 
-                {/* Content will go here in Phase 2 */}
+                {/* Summary Metrics Cards */}
+                <View style={styles.metricsContainer}>
+                    <View style={[styles.metricCard, { backgroundColor: '#FFF5E6' }]}>
+                        <View style={styles.metricHeader}>
+                            <Ionicons name="cash-outline" size={14} color="#F59E0B" />
+                            <Text style={styles.metricLabel}>Current Bill</Text>
+                        </View>
+                        <Text style={[styles.metricValue, { color: '#0F172A' }]}>₹0</Text>
+                    </View>
+
+                    <View style={[styles.metricCard, { backgroundColor: '#E0F2FE' }]}>
+                        <View style={styles.metricHeader}>
+                            <Ionicons name="trending-up-outline" size={14} color="#059669" />
+                            <Text style={styles.metricLabel}>Total Savings</Text>
+                        </View>
+                        <Text style={[styles.metricValue, { color: '#0F172A' }]}>₹22735</Text>
+                    </View>
+
+                    <View style={[styles.metricCard, { backgroundColor: '#EEF2FF' }]}>
+                        <View style={styles.metricHeader}>
+                            <Ionicons name="calculator-outline" size={14} color="#6366F1" />
+                            <Text style={styles.metricLabel}>Avg Monthly Bill</Text>
+                        </View>
+                        <Text style={[styles.metricValue, { color: '#0F172A' }]}>₹2037</Text>
+                    </View>
+                </View>
+
+                {/* Content will go here in Phase 3 */}
 
             </ScrollView>
         </View>
@@ -140,6 +167,40 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: '#6B7280',
         fontWeight: '500',
+    },
+    metricsContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        paddingHorizontal: 20,
+        marginBottom: 20,
+    },
+    metricCard: {
+        flex: 1,
+        borderRadius: 16,
+        padding: 12,
+        marginHorizontal: 4,
+        // Optional subtle shadow
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+        elevation: 2,
+    },
+    metricHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 8,
+    },
+    metricLabel: {
+        fontSize: 10,
+        fontWeight: '600',
+        color: '#475569',
+        marginLeft: 4,
+    },
+    metricValue: {
+        fontSize: 20,
+        fontWeight: '800',
+        letterSpacing: -0.5,
     },
 });
 
