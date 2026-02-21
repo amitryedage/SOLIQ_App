@@ -41,8 +41,6 @@ const BottomNavbar = ({ activeTab, onTabPress }) => {
                     onPress={() => onTabPress('subscription')}
                 />
 
-                {/* Space for FAB */}
-                <View style={[styles.fabSpacer, { flex: 0.6 }]} />
 
                 <NavItem
                     icon="cart"
@@ -109,9 +107,8 @@ const styles = StyleSheet.create({
     },
     fabContainer: {
         position: 'absolute',
-        top: -30,
-        left: '50%',
-        marginLeft: -30,
+        bottom: 90, // Hover above the nav bar height
+        right: 20,
         width: 60,
         height: 60,
         borderRadius: 30,
