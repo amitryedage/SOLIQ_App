@@ -33,8 +33,16 @@ const BottomNavbar = ({ activeTab, onTabPress }) => {
                     onPress={() => onTabPress('khata')}
                 />
 
+                <NavItem
+                    icon="star-outline"
+                    iconType="Ionicons"
+                    label="Plans"
+                    active={activeTab === 'subscription'}
+                    onPress={() => onTabPress('subscription')}
+                />
+
                 {/* Space for FAB */}
-                <View style={styles.fabSpacer} />
+                <View style={[styles.fabSpacer, { flex: 0.6 }]} />
 
                 <NavItem
                     icon="cart"
@@ -46,7 +54,7 @@ const BottomNavbar = ({ activeTab, onTabPress }) => {
                 <NavItem
                     icon="leaf"
                     iconType="FA"
-                    label="Carbon Credits"
+                    label="CO2"
                     active={activeTab === 'carbon'}
                     onPress={() => onTabPress('carbon')}
                 />

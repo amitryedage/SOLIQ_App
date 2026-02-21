@@ -8,6 +8,7 @@ import EnergyScore from '../components/EnergyScore';
 import ActionGrid from '../components/ActionGrid';
 import BottomNavbar from '../components/BottomNavbar';
 import CarbonDashboard from '../components/CarbonDashboard';
+import SubscriptionScreen from '../components/SubscriptionScreen';
 
 const HomeScreen = () => {
     const [activeTab, setActiveTab] = useState('home');
@@ -31,6 +32,10 @@ const HomeScreen = () => {
 
         if (activeTab === 'carbon') {
             return <CarbonDashboard />;
+        }
+
+        if (activeTab === 'subscription') {
+            return <SubscriptionScreen />;
         }
 
         return (
