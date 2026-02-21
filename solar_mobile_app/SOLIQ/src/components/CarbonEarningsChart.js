@@ -1,24 +1,34 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, Dimensions, PanResponder, Animated } from 'react-native';
-import Svg, { Rect, Line } from 'react-native-svg';
+import Svg, { Rect, Line, Defs, LinearGradient, Stop } from 'react-native-svg';
 
 const { width } = Dimensions.get('window');
 const CHART_WIDTH = width - 70;
-const CHART_HEIGHT = 120;
+const CHART_HEIGHT = 140;
 
 const CarbonEarningsChart = () => {
     const [activeIndex, setActiveIndex] = useState(null);
     const tooltipOpacity = useRef(new Animated.Value(0)).current;
+    const entryAnim = useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+        Animated.timing(entryAnim, {
+            toValue: 1,
+            duration: 800,
+            delay: 150, // Slight stagger after the line chart
+            useNativeDriver: true,
+        }).start();
+    }, []);
 
     const data = [
-        { label: 'Jan', value: 245, h: 60 },
-        { label: 'Mar', value: 180, h: 40 },
-        { label: 'May', value: 210, h: 45 },
-        { label: 'Jul', value: 375, h: 80 },
-        { label: 'Sep', value: 225, h: 55 },
+        { label: 'Jan', value: 245, h: 50 },
+        { label: 'Mar', value: 180, h: 30 },
+        { label: 'May', value: 310, h: 70 },
+        { label: 'Jul', value: 375, h: 90 },
+        { label: 'Sep', value: 225, h: 45 },
     ];
 
-    const barWidth = 35;
+    const barWidth = 32;
     const spacing = (CHART_WIDTH - (data.length * barWidth)) / (data.length - 1);
 
     const panResponder = useRef(
@@ -30,7 +40,7 @@ const CarbonEarningsChart = () => {
                 const index = Math.floor(locationX / (barWidth + spacing));
                 if (index >= 0 && index < data.length) {
                     setActiveIndex(index);
-                    Animated.timing(tooltipOpacity, { toValue: 1, duration: 200, useNativeDriver: true }).start();
+                    Animated.timing(tooltipOpacity, { toValue: 1, duration: 150, useNativeDriver: true }).start();
                 }
             },
             onPanResponderMove: (evt) => {
@@ -43,12 +53,12 @@ const CarbonEarningsChart = () => {
                 }
             },
             onPanResponderRelease: () => {
-                Animated.timing(tooltipOpacity, { toValue: 0, duration: 200, useNativeDriver: true }).start(() => {
+                Animated.timing(tooltipOpacity, { toValue: 0, duration: 250, useNativeDriver: true }).start(() => {
                     setActiveIndex(null);
                 });
             },
             onPanResponderTerminate: () => {
-                Animated.timing(tooltipOpacity, { toValue: 0, duration: 200, useNativeDriver: true }).start(() => {
+                Animated.timing(tooltipOpacity, { toValue: 0, duration: 250, useNativeDriver: true }).start(() => {
                     setActiveIndex(null);
                 });
             },
@@ -56,9 +66,16 @@ const CarbonEarningsChart = () => {
     ).current;
 
     return (
-        <View style={styles.container}>
+        <Animated.View style={[styles.container, { opacity: entryAnim, transform: [{ translateY: entryAnim.interpolate({ inputRange: [0, 1], outputRange: [20, 0] }) }] }]}>
             <View style={styles.header}>
-                <Text style={styles.title}>Carbon Credit Earnings</Text>
+                <View>
+                    <Text style={styles.title}>Carbon Credit Earnings</Text>
+                    <Text style={styles.subtitle}>Revenue generated (₹)</Text>
+                </View>
+                <View style={[styles.legend, { backgroundColor: '#FFFBEB' }]}>
+                    <View style={[styles.dot, { backgroundColor: '#F59E0B' }]} />
+                    <Text style={[styles.legendText, { color: '#B45309' }]}>Earnings (₹)</Text>
+                </View>
             </View>
 
             <View style={styles.chartArea}>
@@ -70,44 +87,60 @@ const CarbonEarningsChart = () => {
 
                 <View style={styles.svgContainer} {...panResponder.panHandlers}>
                     <Svg height={CHART_HEIGHT} width={CHART_WIDTH}>
-                        <Line x1="0" y1="0" x2={CHART_WIDTH} y2="0" stroke="#eee" strokeWidth="1" />
-                        <Line x1="0" y1={CHART_HEIGHT / 2} x2={CHART_WIDTH} y2={CHART_HEIGHT / 2} stroke="#eee" strokeWidth="1" />
-                        <Line x1="0" y1={CHART_HEIGHT} x2={CHART_WIDTH} y2={CHART_HEIGHT} stroke="#eee" strokeWidth="1" />
+                        <Defs>
+                            <LinearGradient id="barGradNormal" x1="0" y1="0" x2="0" y2="1">
+                                <Stop offset="0" stopColor="#FBBF24" />
+                                <Stop offset="1" stopColor="#F59E0B" />
+                            </LinearGradient>
+                            <LinearGradient id="barGradActive" x1="0" y1="0" x2="0" y2="1">
+                                <Stop offset="0" stopColor="#FDE68A" />
+                                <Stop offset="1" stopColor="#F59E0B" />
+                            </LinearGradient>
+                        </Defs>
 
-                        {data.map((item, i) => (
-                            <Rect
-                                key={i}
-                                x={i * (barWidth + spacing)}
-                                y={CHART_HEIGHT - item.h}
-                                width={barWidth}
-                                height={item.h}
-                                fill={activeIndex === i ? '#FF8F00' : '#FFA000'}
-                                rx="5"
-                            />
-                        ))}
+                        <Line x1="0" y1="0" x2={CHART_WIDTH} y2="0" stroke="rgba(0,0,0,0.04)" strokeWidth="1" strokeDasharray="3 3" />
+                        <Line x1="0" y1={CHART_HEIGHT / 2} x2={CHART_WIDTH} y2={CHART_HEIGHT / 2} stroke="rgba(0,0,0,0.04)" strokeWidth="1" strokeDasharray="3 3" />
+                        <Line x1="0" y1={CHART_HEIGHT} x2={CHART_WIDTH} y2={CHART_HEIGHT} stroke="rgba(0,0,0,0.04)" strokeWidth="1" />
+
+                        {data.map((item, i) => {
+                            const isActive = activeIndex === i;
+                            const isDimmed = activeIndex !== null && activeIndex !== i;
+                            return (
+                                <Rect
+                                    key={i}
+                                    x={i * (barWidth + spacing)}
+                                    y={CHART_HEIGHT - item.h}
+                                    width={barWidth}
+                                    height={item.h}
+                                    fill={isActive ? "url(#barGradActive)" : "url(#barGradNormal)"}
+                                    opacity={isDimmed ? 0.4 : 1}
+                                    rx="6" // Rounded caps
+                                />
+                            );
+                        })}
                     </Svg>
 
                     {activeIndex !== null && (
-                        <Animated.View style={[styles.tooltip, {
+                        <Animated.View style={[styles.tooltipContainer, {
                             opacity: tooltipOpacity,
-                            left: Math.max(0, Math.min(CHART_WIDTH - 60, (activeIndex * (barWidth + spacing)) - 12.5)),
-                            top: CHART_HEIGHT - data[activeIndex].h - 45,
-                            transform: [{ scale: tooltipOpacity }]
+                            left: Math.max(0, Math.min(CHART_WIDTH - 60, (activeIndex * (barWidth + spacing)) - 14)),
+                            top: Math.max(-10, CHART_HEIGHT - data[activeIndex].h - 35),
+                            transform: [{ scale: tooltipOpacity.interpolate({ inputRange: [0, 1], outputRange: [0.8, 1] }) }]
                         }]}>
-                            <Text style={styles.tooltipValue}>₹{data[activeIndex].value}</Text>
+                            <View style={[styles.tooltip, { backgroundColor: '#78350F' }]}>
+                                <Text style={styles.tooltipValue}>₹{data[activeIndex].value}</Text>
+                            </View>
                         </Animated.View>
                     )}
                 </View>
             </View>
 
             <View style={styles.xAxis}>
-                <Text style={styles.axisLabel}>Jan</Text>
-                <Text style={styles.axisLabel}>Mar</Text>
-                <Text style={styles.axisLabel}>May</Text>
-                <Text style={styles.axisLabel}>Jul</Text>
-                <Text style={styles.axisLabel}>Sep</Text>
+                {data.map((d, i) => (
+                    <Text key={i} style={styles.axisLabel}>{d.label}</Text>
+                ))}
             </View>
-        </View>
+        </Animated.View>
     );
 };
 
@@ -116,18 +149,49 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         marginHorizontal: 15,
         marginVertical: 10,
-        borderRadius: 20,
-        padding: 15,
+        borderRadius: 24,
+        padding: 20,
+        elevation: 6,
+        shadowColor: '#94A3B8',
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.15,
+        shadowRadius: 16,
         borderWidth: 1,
-        borderColor: '#F0F0F0',
+        borderColor: 'rgba(255,255,255,0.8)',
     },
     header: {
-        marginBottom: 15,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
+        marginBottom: 20,
     },
     title: {
-        fontSize: 14,
-        fontWeight: 'bold',
-        color: '#333',
+        fontSize: 16,
+        fontWeight: '800',
+        color: '#0F172A',
+        letterSpacing: -0.5,
+    },
+    subtitle: {
+        fontSize: 11,
+        color: '#64748B',
+        marginTop: 2,
+    },
+    legend: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 12,
+    },
+    dot: {
+        width: 6,
+        height: 6,
+        borderRadius: 3,
+        marginRight: 6,
+    },
+    legendText: {
+        fontSize: 10,
+        fontWeight: '600',
     },
     chartArea: {
         flexDirection: 'row',
@@ -136,7 +200,7 @@ const styles = StyleSheet.create({
     yAxis: {
         justifyContent: 'space-between',
         height: CHART_HEIGHT,
-        marginRight: 10,
+        marginRight: 12,
     },
     svgContainer: {
         flex: 1,
@@ -146,31 +210,34 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         paddingLeft: 35,
-        marginTop: 10,
+        marginTop: 15,
     },
     axisLabel: {
         fontSize: 10,
-        color: '#BBB',
+        fontWeight: '600',
+        color: '#94A3B8',
+    },
+    tooltipContainer: {
+        position: 'absolute',
+        alignItems: 'center',
+        zIndex: 100,
+        width: 60,
     },
     tooltip: {
-        position: 'absolute',
-        backgroundColor: 'rgba(0,0,0,0.85)',
-        borderRadius: 8,
+        borderRadius: 12,
         paddingVertical: 5,
         paddingHorizontal: 8,
-        alignItems: 'center',
-        minWidth: 60,
-        zIndex: 100,
-        elevation: 5,
+        elevation: 6,
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
+        shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.25,
-        shadowRadius: 3.84,
+        shadowRadius: 6,
     },
     tooltipValue: {
-        color: '#fff',
+        color: '#FFFBEB',
         fontSize: 12,
         fontWeight: 'bold',
+        letterSpacing: 0.5,
     },
 });
 
