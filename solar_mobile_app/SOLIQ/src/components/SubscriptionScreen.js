@@ -1,17 +1,78 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, Animated, Easing } from 'react-native';
 import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const { width } = Dimensions.get('window');
 
-const FeatureItem = ({ text }) => (
-    <View style={styles.featureItem}>
-        <Ionicons name="checkmark" size={14} color="#4CAF50" style={styles.featureIcon} />
-        <Text style={styles.featureText}>{text}</Text>
-    </View>
-);
+const FeatureItem = ({ text, delay }) => {
+    const fadeAnim = useRef(new Animated.Value(0)).current;
+    const slideAnim = useRef(new Animated.Value(10)).current;
+
+    useEffect(() => {
+        Animated.parallel([
+            Animated.timing(fadeAnim, {
+                toValue: 1,
+                duration: 400,
+                delay: delay,
+                useNativeDriver: true,
+            }),
+            Animated.timing(slideAnim, {
+                toValue: 0,
+                duration: 400,
+                delay: delay,
+                useNativeDriver: true,
+            })
+        ]).start();
+    }, [delay, fadeAnim, slideAnim]);
+
+    return (
+        <Animated.View style={[styles.featureItem, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
+            <Ionicons name="checkmark" size={14} color="#4CAF50" style={styles.featureIcon} />
+            <Text style={styles.featureText}>{text}</Text>
+        </Animated.View>
+    );
+};
+
+const AnimatedProgressBar = ({ fillPercentage, color, bg }) => {
+    const widthAnim = useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+        Animated.timing(widthAnim, {
+            toValue: fillPercentage,
+            duration: 1000,
+            easing: Easing.out(Easing.exp),
+            useNativeDriver: false, // width doesn't support native driver
+        }).start();
+    }, [fillPercentage, widthAnim]);
+
+    return (
+        <View style={[styles.progressBg, { backgroundColor: bg }]}>
+            <Animated.View style={[
+                styles.progressFill,
+                {
+                    backgroundColor: color,
+                    width: widthAnim.interpolate({
+                        inputRange: [0, 100],
+                        outputRange: ['0%', '100%']
+                    })
+                }
+            ]} />
+        </View>
+    );
+};
 
 const SubscriptionScreen = () => {
+    const scaleAnim = useRef(new Animated.Value(1)).current;
+
+    const handlePressIn = () => {
+        Animated.spring(scaleAnim, { toValue: 0.95, useNativeDriver: true }).start();
+    };
+
+    const handlePressOut = () => {
+        Animated.spring(scaleAnim, { toValue: 1, friction: 3, tension: 40, useNativeDriver: true }).start();
+    };
+
     return (
         <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
             {/* Header Section */}
@@ -57,7 +118,8 @@ const SubscriptionScreen = () => {
 
                 <View style={styles.specsContainer}>
                     <Text style={styles.specText}>Capacity: 5 kW</Text>
-                    <Text style={styles.specText}>Support: Email (48h response)</Text>
+                    <AnimatedProgressBar fillPercentage={25} color="#4CAF50" bg="#E8F5E9" />
+                    <Text style={[styles.specText, { marginTop: 6 }]}>Support: Email (48h response)</Text>
                     <Text style={styles.specText}>SLA: 95%</Text>
                 </View>
             </View>
@@ -81,18 +143,19 @@ const SubscriptionScreen = () => {
 
                     <View style={styles.cardSpecs}>
                         <Text style={styles.cardSpecText}>Capacity: 5 kW</Text>
-                        <Text style={styles.cardSpecText}>Support: Email (48h response)</Text>
+                        <AnimatedProgressBar fillPercentage={25} color="#999" bg="#E2E8F0" />
+                        <Text style={[styles.cardSpecText, { marginTop: 4 }]}>Support: Email (48h response)</Text>
                         <Text style={styles.cardSpecText}>SLA: 99%</Text>
                     </View>
 
                     <View style={styles.divider} />
 
                     <View style={styles.featureList}>
-                        <FeatureItem text="Up to 5 kW monitoring" />
-                        <FeatureItem text="Daily reports" />
-                        <FeatureItem text="Email support" />
-                        <FeatureItem text="Basic analytics" />
-                        <FeatureItem text="Mobile app access" />
+                        <FeatureItem text="Up to 5 kW monitoring" delay={100} />
+                        <FeatureItem text="Daily reports" delay={200} />
+                        <FeatureItem text="Email support" delay={300} />
+                        <FeatureItem text="Basic analytics" delay={400} />
+                        <FeatureItem text="Mobile app access" delay={500} />
                     </View>
 
                     <TouchableOpacity style={styles.currentPlanBtn} disabled>
@@ -112,25 +175,66 @@ const SubscriptionScreen = () => {
 
                     <View style={styles.cardSpecs}>
                         <Text style={styles.cardSpecText}>Capacity: 15 kW</Text>
-                        <Text style={styles.cardSpecText}>Support: Priority (4h response)</Text>
+                        <AnimatedProgressBar fillPercentage={50} color="#FF9800" bg="#FFE0B2" />
+                        <Text style={[styles.cardSpecText, { marginTop: 4 }]}>Support: Priority (4h response)</Text>
                         <Text style={styles.cardSpecText}>SLA: 99.9%</Text>
                     </View>
 
                     <View style={styles.divider} />
 
                     <View style={styles.featureList}>
-                        <FeatureItem text="Up to 15 kW monitoring" />
-                        <FeatureItem text="Real-time dashboard" />
-                        <FeatureItem text="Priority support" />
-                        <FeatureItem text="Advanced analytics" />
-                        <FeatureItem text="Fault detection" />
-                        <FeatureItem text="Carbon tracking" />
-                        <FeatureItem text="API access" />
+                        <FeatureItem text="Up to 15 kW monitoring" delay={100} />
+                        <FeatureItem text="Real-time dashboard" delay={200} />
+                        <FeatureItem text="Priority support" delay={300} />
+                        <FeatureItem text="Advanced analytics" delay={400} />
+                        <FeatureItem text="Fault detection" delay={500} />
+                        <FeatureItem text="Carbon tracking" delay={600} />
+                        <FeatureItem text="API access" delay={700} />
                     </View>
                 </View>
             </View>
 
-            {/* Spacer for next phase */}
+            {/* Independence Tier Card */}
+            <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+                <LinearGradient
+                    colors={['#F3E5F5', '#E1BEE7']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.independenceCard}
+                >
+                    <FontAwesome5 name="rocket" size={24} color="#D81B60" style={styles.independenceIcon} />
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <View>
+                            <Text style={styles.independencePlanName}>Independence</Text>
+                            <Text style={styles.independencePriceText}>
+                                <Text style={styles.independencePriceAmount}>₹1999</Text>/mo
+                            </Text>
+                        </View>
+                        <View style={{ width: 100, alignItems: 'flex-end', marginBottom: 15 }}>
+                            <Text style={[styles.cardSpecText, { color: '#880E4F' }]}>Capacity: 50 kW+</Text>
+                            <AnimatedProgressBar fillPercentage={100} color="#D81B60" bg="#F8BBD0" />
+                        </View>
+                    </View>
+
+                    <TouchableOpacity
+                        style={styles.upgradeBtnContainer}
+                        activeOpacity={0.9}
+                        onPressIn={handlePressIn}
+                        onPressOut={handlePressOut}
+                    >
+                        <LinearGradient
+                            colors={['#FF9800', '#F57C00']}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 0 }}
+                            style={styles.upgradeBtn}
+                        >
+                            <Text style={styles.upgradeBtnText}>Upgrade to Independence</Text>
+                        </LinearGradient>
+                    </TouchableOpacity>
+                </LinearGradient>
+            </Animated.View>
+
+            {/* Spacer for bottom navbar */}
             <View style={{ height: 100 }} />
         </ScrollView>
     );
@@ -273,7 +377,7 @@ const styles = StyleSheet.create({
         borderColor: '#E2E8F0',
     },
     premiumCard: {
-        backgroundColor: '#FFF8F0', // Light warm tint
+        backgroundColor: '#FFF8F0',
         borderColor: '#FFE0B2',
         shadowColor: '#FF9800',
         shadowOffset: { width: 0, height: 4 },
@@ -389,7 +493,6 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: '#D81B60', // Deep pink/purple
         fontWeight: '600',
-        marginBottom: 20,
     },
     independencePriceAmount: {
         fontSize: 24,
@@ -414,6 +517,19 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 16,
         fontWeight: 'bold',
+    },
+
+    // Progress Bar Styles
+    progressBg: {
+        height: 6,
+        borderRadius: 3,
+        width: '100%',
+        overflow: 'hidden',
+        marginTop: 2,
+    },
+    progressFill: {
+        height: '100%',
+        borderRadius: 3,
     }
 });
 
