@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView, Platform } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView, Platform, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import KhataEnergyChart from './KhataEnergyChart';
@@ -7,6 +7,40 @@ import KhataBillingHistory from './KhataBillingHistory';
 
 const KhataScreen = () => {
     const insets = useSafeAreaInsets();
+
+    // Animation values for the 3 metric cards
+    const cardOpacities = useRef([
+        new Animated.Value(0),
+        new Animated.Value(0),
+        new Animated.Value(0)
+    ]).current;
+
+    const cardTranslations = useRef([
+        new Animated.Value(20), // Start 20px lower
+        new Animated.Value(20),
+        new Animated.Value(20)
+    ]).current;
+
+    useEffect(() => {
+        // Create an array of parallel animations (opacity + translation) for each card
+        const animations = cardOpacities.map((opacity, index) => {
+            return Animated.parallel([
+                Animated.timing(opacity, {
+                    toValue: 1,
+                    duration: 400,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(cardTranslations[index], {
+                    toValue: 0,
+                    duration: 400,
+                    useNativeDriver: true,
+                })
+            ]);
+        });
+
+        // Trigger them with a 150ms stagger
+        Animated.stagger(150, animations).start();
+    }, []);
 
     return (
         <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -23,29 +57,41 @@ const KhataScreen = () => {
 
                 {/* Summary Metrics Cards */}
                 <View style={styles.metricsContainer}>
-                    <View style={[styles.metricCard, { backgroundColor: '#FFF5E6' }]}>
+                    <Animated.View style={[styles.metricCard, {
+                        backgroundColor: '#FFF5E6',
+                        opacity: cardOpacities[0],
+                        transform: [{ translateY: cardTranslations[0] }]
+                    }]}>
                         <View style={styles.metricHeader}>
                             <Ionicons name="cash-outline" size={14} color="#F59E0B" />
                             <Text style={styles.metricLabel}>Current Bill</Text>
                         </View>
                         <Text style={[styles.metricValue, { color: '#0F172A' }]}>₹0</Text>
-                    </View>
+                    </Animated.View>
 
-                    <View style={[styles.metricCard, { backgroundColor: '#E0F2FE' }]}>
+                    <Animated.View style={[styles.metricCard, {
+                        backgroundColor: '#E0F2FE',
+                        opacity: cardOpacities[1],
+                        transform: [{ translateY: cardTranslations[1] }]
+                    }]}>
                         <View style={styles.metricHeader}>
                             <Ionicons name="trending-up-outline" size={14} color="#059669" />
                             <Text style={styles.metricLabel}>Total Savings</Text>
                         </View>
                         <Text style={[styles.metricValue, { color: '#0F172A' }]}>₹22735</Text>
-                    </View>
+                    </Animated.View>
 
-                    <View style={[styles.metricCard, { backgroundColor: '#EEF2FF' }]}>
+                    <Animated.View style={[styles.metricCard, {
+                        backgroundColor: '#EEF2FF',
+                        opacity: cardOpacities[2],
+                        transform: [{ translateY: cardTranslations[2] }]
+                    }]}>
                         <View style={styles.metricHeader}>
                             <Ionicons name="calculator-outline" size={14} color="#6366F1" />
                             <Text style={styles.metricLabel}>Avg Monthly Bill</Text>
                         </View>
                         <Text style={[styles.metricValue, { color: '#0F172A' }]}>₹2037</Text>
-                    </View>
+                    </Animated.View>
                 </View>
 
                 {/* Energy Chart Component */}

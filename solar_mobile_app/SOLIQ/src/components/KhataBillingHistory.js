@@ -1,6 +1,40 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+
+// Reusable Spring-Animated Button Wrapper
+const BouncyButton = ({ children, style, onPress }) => {
+    const scaleValue = useRef(new Animated.Value(1)).current;
+
+    const handlePressIn = () => {
+        Animated.spring(scaleValue, {
+            toValue: 0.9,
+            useNativeDriver: true,
+        }).start();
+    };
+
+    const handlePressOut = () => {
+        Animated.spring(scaleValue, {
+            toValue: 1,
+            friction: 3,
+            tension: 40,
+            useNativeDriver: true,
+        }).start();
+    };
+
+    return (
+        <TouchableOpacity
+            activeOpacity={1}
+            onPressIn={handlePressIn}
+            onPressOut={handlePressOut}
+            onPress={onPress}
+        >
+            <Animated.View style={[style, { transform: [{ scale: scaleValue }] }]}>
+                {children}
+            </Animated.View>
+        </TouchableOpacity>
+    );
+};
 
 const KhataBillingHistory = () => {
     // Mock History Data matching the design
@@ -10,15 +44,37 @@ const KhataBillingHistory = () => {
         { id: '3', month: '2025-11', gen: '422.7 kWh', con: '1999', savings: '₹1999', sub: 'Download' }, // For custom icons
     ];
 
+    // Animation values for waterfall row entrance
+    const rowOpacities = useRef(historyData.map(() => new Animated.Value(0))).current;
+    const rowTranslations = useRef(historyData.map(() => new Animated.Value(15))).current;
+
+    useEffect(() => {
+        const animations = historyData.map((_, index) => {
+            return Animated.parallel([
+                Animated.timing(rowOpacities[index], {
+                    toValue: 1,
+                    duration: 350,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(rowTranslations[index], {
+                    toValue: 0,
+                    duration: 350,
+                    useNativeDriver: true,
+                })
+            ]);
+        });
+        Animated.stagger(100, animations).start();
+    }, []);
+
     return (
         <View style={styles.container}>
             {/* Header */}
             <View style={styles.header}>
                 <Text style={styles.title}>Billing History</Text>
-                <TouchableOpacity style={styles.seeAllButton}>
+                <BouncyButton style={styles.seeAllButton}>
                     <Text style={styles.seeAllText}>See All</Text>
                     <Ionicons name="chevron-forward" size={16} color="#3B82F6" />
-                </TouchableOpacity>
+                </BouncyButton>
             </View>
 
             {/* Table Header Row */}
@@ -32,11 +88,15 @@ const KhataBillingHistory = () => {
 
             {/* Table Rows */}
             {historyData.map((row, index) => (
-                <View
+                <Animated.View
                     key={row.id}
                     style={[
                         styles.tableRow,
-                        index !== historyData.length - 1 && styles.rowBorder
+                        index !== historyData.length - 1 && styles.rowBorder,
+                        {
+                            opacity: rowOpacities[index],
+                            transform: [{ translateY: rowTranslations[index] }]
+                        }
                     ]}
                 >
                     <Text style={[styles.cellText, { flex: 1.5, fontWeight: '700', color: '#1E293B' }]}>{row.month}</Text>
@@ -74,7 +134,7 @@ const KhataBillingHistory = () => {
                             <Text style={[styles.cellText, { fontWeight: '700', color: '#1E293B' }]}>{row.sub}</Text>
                         )}
                     </View>
-                </View>
+                </Animated.View>
             ))}
         </View>
     );

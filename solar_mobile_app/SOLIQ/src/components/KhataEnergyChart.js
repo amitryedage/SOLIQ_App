@@ -1,6 +1,8 @@
-import React from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, Dimensions, Animated, Easing } from 'react-native';
 import Svg, { Rect, Line, Text as SvgText } from 'react-native-svg';
+
+const AnimatedRect = Animated.createAnimatedComponent(Rect);
 
 const { width } = Dimensions.get('window');
 const CHART_WIDTH = width - 80;
@@ -16,6 +18,18 @@ const KhataEnergyChart = () => {
     ];
 
     const MAX_VALUE = 600;
+
+    // Animation
+    const chartProgress = useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+        Animated.timing(chartProgress, {
+            toValue: 1,
+            duration: 800,
+            easing: Easing.out(Easing.cubic),
+            useNativeDriver: false, // SVG height/y must not use native driver
+        }).start();
+    }, []);
 
     // Group width calculations
     const numGroups = data.length;
@@ -59,24 +73,42 @@ const KhataEnergyChart = () => {
                             const genHeight = (item.gen / MAX_VALUE) * CHART_HEIGHT;
                             const conHeight = (item.con / MAX_VALUE) * CHART_HEIGHT;
 
+                            const animatedGenHeight = chartProgress.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: [0, genHeight]
+                            });
+                            const animatedGenY = chartProgress.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: [CHART_HEIGHT, CHART_HEIGHT - genHeight]
+                            });
+
+                            const animatedConHeight = chartProgress.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: [0, conHeight]
+                            });
+                            const animatedConY = chartProgress.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: [CHART_HEIGHT, CHART_HEIGHT - conHeight]
+                            });
+
                             return (
                                 <React.Fragment key={index}>
                                     {/* Generated Bar (Orange) */}
-                                    <Rect
+                                    <AnimatedRect
                                         x={groupX}
-                                        y={CHART_HEIGHT - genHeight}
+                                        y={animatedGenY}
                                         width={barWidth}
-                                        height={genHeight}
+                                        height={animatedGenHeight}
                                         fill="#F59E0B"
                                         rx={2}
                                     />
 
                                     {/* Consumed Bar (Blue) */}
-                                    <Rect
+                                    <AnimatedRect
                                         x={groupX + barWidth + barPadding}
-                                        y={CHART_HEIGHT - conHeight}
+                                        y={animatedConY}
                                         width={barWidth}
-                                        height={conHeight}
+                                        height={animatedConHeight}
                                         fill="#3B82F6"
                                         rx={2}
                                     />
