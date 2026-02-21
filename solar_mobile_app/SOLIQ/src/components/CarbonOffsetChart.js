@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, Dimensions, PanResponder, Animated } from 'react-native';
-import Svg, { Path, Line, Circle, Defs, LinearGradient, Stop, G } from 'react-native-svg';
+import Svg, { Path, Line, Circle, Defs, LinearGradient, Stop, G, Text as SvgText } from 'react-native-svg';
 
 const { width } = Dimensions.get('window');
 const CHART_WIDTH = width - 70;
@@ -67,14 +67,10 @@ const CarbonOffsetChart = () => {
                 }
             },
             onPanResponderRelease: () => {
-                Animated.timing(tooltipOpacity, { toValue: 0, duration: 250, useNativeDriver: true }).start(() => {
-                    setActivePoint(null);
-                });
+                // Do not hide the tooltip. Leave it visible!
             },
             onPanResponderTerminate: () => {
-                Animated.timing(tooltipOpacity, { toValue: 0, duration: 250, useNativeDriver: true }).start(() => {
-                    setActivePoint(null);
-                });
+                // Do not hide the tooltip. Leave it visible!
             },
         })
     ).current;
@@ -105,7 +101,7 @@ const CarbonOffsetChart = () => {
                 </View>
 
                 <View style={styles.svgContainer} {...panResponder.panHandlers}>
-                    <Svg height={CHART_HEIGHT} width={CHART_WIDTH}>
+                    <Svg height={CHART_HEIGHT + 30} width={CHART_WIDTH}>
                         <Defs>
                             <LinearGradient id="gradient" x1="0" y1="0" x2="0" y2="1">
                                 <Stop offset="0" stopColor="#10B981" stopOpacity="0.35" />
@@ -169,6 +165,21 @@ const CarbonOffsetChart = () => {
                                 />
                             </G>
                         )}
+
+                        {/* Perfectly Aligned X-Axis Labels */}
+                        {data.filter((_, i) => i % 2 === 0).map((d, i) => (
+                            <SvgText
+                                key={`label-${i}`}
+                                x={d.x}
+                                y={CHART_HEIGHT + 18}
+                                fontSize="10"
+                                fill="#94A3B8"
+                                fontWeight="600"
+                                textAnchor={d.index === 0 ? "start" : d.index === data.length - 1 ? "end" : "middle"}
+                            >
+                                {d.label}
+                            </SvgText>
+                        ))}
                     </Svg>
 
                     {/* Fancy Glossy Tooltip */}
@@ -183,13 +194,6 @@ const CarbonOffsetChart = () => {
                         </View>
                     </Animated.View>
                 </View>
-            </View>
-
-            {/* X-Axis Labels */}
-            <View style={styles.xAxis}>
-                {data.filter((_, i) => i % 2 === 0).map((d, i) => (
-                    <Text key={i} style={styles.axisLabel}>{d.label}</Text>
-                ))}
             </View>
         </Animated.View>
     );
@@ -258,17 +262,7 @@ const styles = StyleSheet.create({
     svgContainer: {
         flex: 1,
         position: 'relative',
-    },
-    xAxis: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        paddingLeft: 35,
-        marginTop: 15,
-    },
-    axisLabel: {
-        fontSize: 10,
-        fontWeight: '600',
-        color: '#94A3B8',
+        paddingBottom: 20, // Make room for SVG text labels
     },
     tooltipContainer: {
         position: 'absolute',

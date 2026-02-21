@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, Dimensions, PanResponder, Animated } from 'react-native';
-import Svg, { Rect, Line, Defs, LinearGradient, Stop } from 'react-native-svg';
+import Svg, { Rect, Line, Defs, LinearGradient, Stop, Text as SvgText } from 'react-native-svg';
 
 const { width } = Dimensions.get('window');
 const CHART_WIDTH = width - 70;
@@ -53,14 +53,10 @@ const CarbonEarningsChart = () => {
                 }
             },
             onPanResponderRelease: () => {
-                Animated.timing(tooltipOpacity, { toValue: 0, duration: 250, useNativeDriver: true }).start(() => {
-                    setActiveIndex(null);
-                });
+                // Do not hide the tooltip. Leave it visible!
             },
             onPanResponderTerminate: () => {
-                Animated.timing(tooltipOpacity, { toValue: 0, duration: 250, useNativeDriver: true }).start(() => {
-                    setActiveIndex(null);
-                });
+                // Do not hide the tooltip. Leave it visible!
             },
         })
     ).current;
@@ -86,7 +82,7 @@ const CarbonEarningsChart = () => {
                 </View>
 
                 <View style={styles.svgContainer} {...panResponder.panHandlers}>
-                    <Svg height={CHART_HEIGHT} width={CHART_WIDTH}>
+                    <Svg height={CHART_HEIGHT + 30} width={CHART_WIDTH}>
                         <Defs>
                             <LinearGradient id="barGradNormal" x1="0" y1="0" x2="0" y2="1">
                                 <Stop offset="0" stopColor="#FBBF24" />
@@ -107,7 +103,7 @@ const CarbonEarningsChart = () => {
                             const isDimmed = activeIndex !== null && activeIndex !== i;
                             return (
                                 <Rect
-                                    key={i}
+                                    key={`bar-${i}`}
                                     x={i * (barWidth + spacing)}
                                     y={CHART_HEIGHT - item.h}
                                     width={barWidth}
@@ -118,6 +114,21 @@ const CarbonEarningsChart = () => {
                                 />
                             );
                         })}
+
+                        {/* Perfectly Aligned X-Axis Labels */}
+                        {data.map((item, i) => (
+                            <SvgText
+                                key={`label-${i}`}
+                                x={i * (barWidth + spacing) + (barWidth / 2)} // Centered exactly under the bar
+                                y={CHART_HEIGHT + 18}
+                                fontSize="10"
+                                fill="#94A3B8"
+                                fontWeight="600"
+                                textAnchor="middle"
+                            >
+                                {item.label}
+                            </SvgText>
+                        ))}
                     </Svg>
 
                     {activeIndex !== null && (
@@ -133,12 +144,6 @@ const CarbonEarningsChart = () => {
                         </Animated.View>
                     )}
                 </View>
-            </View>
-
-            <View style={styles.xAxis}>
-                {data.map((d, i) => (
-                    <Text key={i} style={styles.axisLabel}>{d.label}</Text>
-                ))}
             </View>
         </Animated.View>
     );
@@ -205,17 +210,7 @@ const styles = StyleSheet.create({
     svgContainer: {
         flex: 1,
         position: 'relative',
-    },
-    xAxis: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        paddingLeft: 35,
-        marginTop: 15,
-    },
-    axisLabel: {
-        fontSize: 10,
-        fontWeight: '600',
-        color: '#94A3B8',
+        paddingBottom: 20, // Make room for the SVG text labels
     },
     tooltipContainer: {
         position: 'absolute',
