@@ -11,7 +11,7 @@ import CarbonDashboard from '../components/CarbonDashboard';
 import SubscriptionScreen from '../components/SubscriptionScreen';
 
 const HomeScreen = () => {
-    const [activeTab, setActiveTab] = useState('home');
+    const [activeTab, setActiveTab] = useState('subscription');
 
     const renderContent = () => {
         if (activeTab === 'home') {
