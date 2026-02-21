@@ -20,13 +20,14 @@ const CarbonEarningsChart = () => {
         }).start();
     }, []);
 
+    const MAX_EARNINGS = 400;
     const data = [
-        { label: 'Jan', value: 245, h: 50 },
-        { label: 'Mar', value: 180, h: 30 },
-        { label: 'May', value: 310, h: 70 },
-        { label: 'Jul', value: 375, h: 90 },
-        { label: 'Sep', value: 225, h: 45 },
-    ];
+        { label: 'Jan', value: 245 },
+        { label: 'Mar', value: 180 },
+        { label: 'May', value: 310 },
+        { label: 'Jul', value: 375 },
+        { label: 'Sep', value: 225 },
+    ].map(d => ({ ...d, h: (d.value / MAX_EARNINGS) * CHART_HEIGHT }));
 
     const barWidth = 32;
     const spacing = (CHART_WIDTH - (data.length * barWidth)) / (data.length - 1);

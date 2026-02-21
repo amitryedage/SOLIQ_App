@@ -10,11 +10,13 @@ const TopNavbar = () => {
                     <Ionicons name="menu-outline" size={28} color="#333" />
                 </TouchableOpacity>
                 <View style={styles.logoContainer}>
-                    <Ionicons name="sunny" size={24} color="#FBC02D" />
-                    <Text style={styles.title}>SolarIQ</Text>
+                    <Ionicons name="sunny" size={32} color="#FBC02D" />
+                    <Text style={{ marginLeft: 6 }}>
+                        <Text style={{ color: '#F4B13E', fontSize: 22, fontWeight: '900', letterSpacing: 0.5 }}>SOL</Text>
+                        <Text style={{ color: '#4285B4', fontSize: 22, fontWeight: '900', letterSpacing: 0.5 }}>IQ</Text>
+                    </Text>
                 </View>
             </View>
-
             <View style={styles.rightSection}>
                 <TouchableOpacity style={styles.iconButton}>
                     <Ionicons name="notifications" size={24} color="#333" />

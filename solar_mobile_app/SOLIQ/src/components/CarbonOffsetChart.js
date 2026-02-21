@@ -21,15 +21,16 @@ const CarbonOffsetChart = () => {
         }).start();
     }, []);
 
-    // Sample data points for the line chart (normalized for height)
+    // Calculate actual pixel 'y' based on the Y-Axis max (600)
+    const MAX_OFFSET = 600;
     const data = [
-        { label: 'Jan', value: 300, x: 0, y: 40 },
-        { label: 'Mar', value: 470, x: (CHART_WIDTH / 5) * 1, y: 80 },
-        { label: 'May', value: 410, x: (CHART_WIDTH / 5) * 2, y: 70 },
-        { label: 'Jul', value: 350, x: (CHART_WIDTH / 5) * 3, y: 50 },
-        { label: 'Sep', value: 280, x: (CHART_WIDTH / 5) * 4, y: 30 },
-        { label: 'Dec', value: 500, x: CHART_WIDTH, y: 90 },
-    ];
+        { label: 'Jan', value: 300, x: 0 },
+        { label: 'Mar', value: 470, x: (CHART_WIDTH / 5) * 1 },
+        { label: 'May', value: 410, x: (CHART_WIDTH / 5) * 2 },
+        { label: 'Jul', value: 350, x: (CHART_WIDTH / 5) * 3 },
+        { label: 'Sep', value: 280, x: (CHART_WIDTH / 5) * 4 },
+        { label: 'Dec', value: 500, x: CHART_WIDTH },
+    ].map(d => ({ ...d, y: (d.value / MAX_OFFSET) * CHART_HEIGHT }));
 
     const findClosestPoint = (touchX) => {
         const xStep = CHART_WIDTH / (data.length - 1);
