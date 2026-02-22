@@ -48,7 +48,19 @@ const KhataBillingHistory = () => {
     const rowOpacities = useRef(historyData.map(() => new Animated.Value(0))).current;
     const rowTranslations = useRef(historyData.map(() => new Animated.Value(15))).current;
 
+    // Advanced: Live Status Beacon Animation
+    const beaconAnim = useRef(new Animated.Value(0)).current;
+
     useEffect(() => {
+        // Beacon Pulse Loop
+        Animated.loop(
+            Animated.timing(beaconAnim, {
+                toValue: 1,
+                duration: 2000,
+                useNativeDriver: true,
+            })
+        ).start();
+
         const animations = historyData.map((_, index) => {
             return Animated.parallel([
                 Animated.timing(rowOpacities[index], {
@@ -118,7 +130,19 @@ const KhataBillingHistory = () => {
                     <View style={styles.actionCell}>
                         {row.sub === 'Paid' ? (
                             <View style={styles.paidBadge}>
-                                <View style={styles.paidDot} />
+                                <View style={{ position: 'relative', width: 10, height: 10, justifyContent: 'center', alignItems: 'center', marginRight: 4 }}>
+                                    <Animated.View
+                                        style={[
+                                            styles.paidDot,
+                                            {
+                                                position: 'absolute',
+                                                transform: [{ scale: beaconAnim.interpolate({ inputRange: [0, 1], outputRange: [1, 2.5] }) }],
+                                                opacity: beaconAnim.interpolate({ inputRange: [0, 1], outputRange: [0.6, 0] }),
+                                            }
+                                        ]}
+                                    />
+                                    <View style={styles.paidDot} />
+                                </View>
                                 <Text style={styles.paidText}>Paid</Text>
                             </View>
                         ) : row.sub === 'Download' ? (
