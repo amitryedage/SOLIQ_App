@@ -1,10 +1,11 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Animated, Easing } from 'react-native';
 import { Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 
 const TodayKhata = () => {
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const slideAnim = useRef(new Animated.Value(20)).current;
+    const progressAnim = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
         Animated.parallel([
@@ -19,6 +20,13 @@ const TodayKhata = () => {
                 duration: 500,
                 delay: 400,
                 useNativeDriver: true,
+            }),
+            Animated.timing(progressAnim, {
+                toValue: 1,
+                duration: 1000,
+                delay: 600, // Grows after sliding up
+                easing: Easing.out(Easing.cubic),
+                useNativeDriver: false,
             })
         ]).start();
     }, []);
@@ -65,7 +73,17 @@ const TodayKhata = () => {
                         </View>
                         {item.progress && (
                             <View style={styles.progressContainer}>
-                                <View style={[styles.progressBar, { width: (item.progress * 100) + '%' }]} />
+                                <Animated.View
+                                    style={[
+                                        styles.progressBar,
+                                        {
+                                            width: progressAnim.interpolate({
+                                                inputRange: [0, 1],
+                                                outputRange: ['0%', (item.progress * 100) + '%']
+                                            })
+                                        }
+                                    ]}
+                                />
                             </View>
                         )}
                         {item.subtitle && (

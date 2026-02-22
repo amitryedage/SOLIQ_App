@@ -1,9 +1,10 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated } from 'react-native';
+import { View, Text, StyleSheet, Animated, Easing } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
 import { LinearGradient } from 'expo-linear-gradient';
 
 const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
+const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 import { Ionicons } from '@expo/vector-icons';
 
 const EnergyScore = () => {
@@ -17,6 +18,7 @@ const EnergyScore = () => {
 
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const slideAnim = useRef(new Animated.Value(20)).current;
+    const gaugeAnim = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
         Animated.parallel([
@@ -31,9 +33,21 @@ const EnergyScore = () => {
                 duration: 500,
                 delay: 550,
                 useNativeDriver: true,
+            }),
+            Animated.timing(gaugeAnim, {
+                toValue: 1,
+                duration: 1500,
+                delay: 750, // Starts drawing right after it slides in
+                easing: Easing.out(Easing.cubic),
+                useNativeDriver: false, // strokeDashoffset cannot use native driver
             })
         ]).start();
     }, []);
+
+    const animatedDashoffset = gaugeAnim.interpolate({
+        inputRange: [0, 1],
+        outputRange: [circumference, strokeDashoffset]
+    });
 
     return (
         <AnimatedLinearGradient
@@ -54,7 +68,7 @@ const EnergyScore = () => {
                         strokeLinecap="round"
                         transform="rotate(135 75 75)"
                     />
-                    <Circle
+                    <AnimatedCircle
                         cx="75"
                         cy="75"
                         r={radius}
@@ -62,7 +76,7 @@ const EnergyScore = () => {
                         strokeWidth={strokeWidth}
                         fill="none"
                         strokeDasharray={circumference}
-                        strokeDashoffset={strokeDashoffset}
+                        strokeDashoffset={animatedDashoffset}
                         strokeLinecap="round"
                         transform="rotate(135 75 75)"
                     />

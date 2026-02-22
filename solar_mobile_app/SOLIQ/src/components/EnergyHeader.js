@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated } from 'react-native';
+import { View, Text, StyleSheet, Animated, Easing } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -7,7 +7,12 @@ const EnergyHeader = () => {
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const slideAnim = useRef(new Animated.Value(-20)).current;
 
+    //  Animations
+    const progressWidth = useRef(new Animated.Value(0)).current;
+    const spinAnim = useRef(new Animated.Value(0)).current;
+
     useEffect(() => {
+        // Entrance & Progress Animations
         Animated.parallel([
             Animated.timing(fadeAnim, {
                 toValue: 1,
@@ -18,9 +23,36 @@ const EnergyHeader = () => {
                 toValue: 0,
                 duration: 500,
                 useNativeDriver: true,
+            }),
+            Animated.timing(progressWidth, {
+                toValue: 73, // Target is 73%
+                duration: 1200, // Slightly longer, smooth growth
+                delay: 300,
+                easing: Easing.out(Easing.cubic),
+                useNativeDriver: false, // Animating width requires false
             })
         ]).start();
+
+        // Infinite Spin Animation for Sun
+        Animated.loop(
+            Animated.timing(spinAnim, {
+                toValue: 1,
+                duration: 10000,
+                easing: Easing.linear,
+                useNativeDriver: true,
+            })
+        ).start();
     }, []);
+
+    const spin = spinAnim.interpolate({
+        inputRange: [0, 1],
+        outputRange: ['0deg', '360deg']
+    });
+
+    const animatedWidth = progressWidth.interpolate({
+        inputRange: [0, 100],
+        outputRange: ['0%', '100%']
+    });
 
     return (
         <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
@@ -36,7 +68,9 @@ const EnergyHeader = () => {
                         <View style={styles.valueRow}>
                             <Text style={styles.value}>2.5</Text>
                             <Text style={styles.unit}>kW</Text>
-                            <Ionicons name="sunny" size={20} color="#FFD700" style={styles.icon} />
+                            <Animated.View style={{ transform: [{ rotate: spin }] }}>
+                                <Ionicons name="sunny" size={20} color="#FFD700" style={styles.icon} />
+                            </Animated.View>
                         </View>
                         <Text style={styles.subtext}>Peak production</Text>
                     </View>
@@ -54,7 +88,7 @@ const EnergyHeader = () => {
                             <Text style={styles.percentageText}>73%</Text>
                         </View>
                         <View style={styles.progressBarBg}>
-                            <View style={[styles.progressBarFill, { width: '73%' }]} />
+                            <Animated.View style={[styles.progressBarFill, { width: animatedWidth }]} />
                         </View>
                     </View>
                 </View>

@@ -1,8 +1,26 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Animated, Easing } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 const TopNavbar = () => {
+    const spinAnim = useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+        Animated.loop(
+            Animated.timing(spinAnim, {
+                toValue: 1,
+                duration: 10000, // 10 seconds for a full rotation (slow & smooth)
+                easing: Easing.linear,
+                useNativeDriver: true,
+            })
+        ).start();
+    }, []);
+
+    const spin = spinAnim.interpolate({
+        inputRange: [0, 1],
+        outputRange: ['0deg', '360deg']
+    });
+
     return (
         <View style={styles.container}>
             <View style={styles.leftSection}>
@@ -10,7 +28,9 @@ const TopNavbar = () => {
                     <Ionicons name="menu-outline" size={28} color="#333" />
                 </TouchableOpacity>
                 <View style={styles.logoContainer}>
-                    <Ionicons name="sunny" size={32} color="#FBC02D" />
+                    <Animated.View style={{ transform: [{ rotate: spin }] }}>
+                        <Ionicons name="sunny" size={32} color="#FBC02D" />
+                    </Animated.View>
                     <Text style={{ marginLeft: 6 }}>
                         <Text style={{ color: '#F4B13E', fontSize: 22, fontWeight: '900', letterSpacing: 0.5 }}>SOL</Text>
                         <Text style={{ color: '#4285B4', fontSize: 22, fontWeight: '900', letterSpacing: 0.5 }}>IQ</Text>
