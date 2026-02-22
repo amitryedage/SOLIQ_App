@@ -1,6 +1,6 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, Dimensions, Animated, Easing } from 'react-native';
-import Svg, { Rect, Line, Text as SvgText } from 'react-native-svg';
+import Svg, { Rect, Line, Text as SvgText, G } from 'react-native-svg';
 
 const AnimatedRect = Animated.createAnimatedComponent(Rect);
 const AnimatedLine = Animated.createAnimatedComponent(Line);
@@ -23,6 +23,32 @@ const KhataEnergyChart = () => {
     // Animation - Sequential Bar Growth
     const barProgresses = useRef(data.map(() => new Animated.Value(0))).current;
     const baseLineAnim = useRef(new Animated.Value(0)).current;
+
+    // Interactivity State
+    const [selectedGroup, setSelectedGroup] = useState(null);
+    const tooltipAnim = useRef(new Animated.Value(0)).current;
+
+    const handlePressGroup = (index) => {
+        if (selectedGroup === index) {
+            // Deselect if already selected
+            hideTooltip();
+        } else {
+            setSelectedGroup(index);
+            Animated.timing(tooltipAnim, {
+                toValue: 1,
+                duration: 300,
+                useNativeDriver: true,
+            }).start();
+        }
+    };
+
+    const hideTooltip = () => {
+        Animated.timing(tooltipAnim, {
+            toValue: 0,
+            duration: 200,
+            useNativeDriver: true,
+        }).start(() => setSelectedGroup(null));
+    };
 
     useEffect(() => {
         // First draw the base line
@@ -77,6 +103,32 @@ const KhataEnergyChart = () => {
 
                 {/* SVG Chart Area */}
                 <View style={styles.svgWrapper}>
+                    {/* Tooltip Overlay */}
+                    {selectedGroup !== null && (
+                        <Animated.View
+                            style={[
+                                styles.tooltip,
+                                {
+                                    opacity: tooltipAnim,
+                                    left: (selectedGroup * (groupWidth + groupPadding)) + (groupWidth / 2) - 35,
+                                    // Move slightly based on the higher bar
+                                    bottom: CHART_HEIGHT - Math.max(
+                                        (data[selectedGroup].gen / MAX_VALUE) * CHART_HEIGHT,
+                                        (data[selectedGroup].con / MAX_VALUE) * CHART_HEIGHT
+                                    ) + 20
+                                }
+                            ]}
+                            pointerEvents="none"
+                        >
+                            <View style={styles.tooltipContent}>
+                                <Text style={styles.tooltipLabel}>Gen: <Text style={{ color: '#F59E0B' }}>{data[selectedGroup].gen}</Text></Text>
+                                <View style={styles.tooltipDivider} />
+                                <Text style={styles.tooltipLabel}>Con: <Text style={{ color: '#3B82F6' }}>{data[selectedGroup].con}</Text></Text>
+                            </View>
+                            <View style={styles.tooltipArrow} />
+                        </Animated.View>
+                    )}
+
                     <Svg width={CHART_WIDTH} height={CHART_HEIGHT + 24}>
                         {/* Grid Lines */}
                         <Line x1="0" y1="0" x2={CHART_WIDTH} y2="0" stroke="#F1F5F9" strokeWidth="1" strokeDasharray="4 4" />
@@ -122,7 +174,16 @@ const KhataEnergyChart = () => {
                             });
 
                             return (
-                                <React.Fragment key={index}>
+                                <G key={index} onPress={() => handlePressGroup(index)}>
+                                    {/* Transparent hit area for easier tapping */}
+                                    <Rect
+                                        x={groupX - 10}
+                                        y={0}
+                                        width={groupWidth + 20}
+                                        height={CHART_HEIGHT}
+                                        fill="transparent"
+                                    />
+
                                     {/* Generated Bar (Orange) */}
                                     <AnimatedRect
                                         x={groupX}
@@ -131,6 +192,7 @@ const KhataEnergyChart = () => {
                                         height={animatedGenHeight}
                                         fill="#F59E0B"
                                         rx={2}
+                                        opacity={selectedGroup === null || selectedGroup === index ? 1 : 0.4}
                                     />
 
                                     {/* Consumed Bar (Blue) */}
@@ -141,6 +203,7 @@ const KhataEnergyChart = () => {
                                         height={animatedConHeight}
                                         fill="#3B82F6"
                                         rx={2}
+                                        opacity={selectedGroup === null || selectedGroup === index ? 1 : 0.4}
                                     />
 
                                     {/* X-Axis Label */}
@@ -155,7 +218,7 @@ const KhataEnergyChart = () => {
                                             {item.label}
                                         </SvgText>
                                     )}
-                                </React.Fragment>
+                                </G>
                             );
                         })}
                     </Svg>
@@ -235,6 +298,47 @@ const styles = StyleSheet.create({
     legendText: {
         fontSize: 11,
         fontWeight: '500',
+    },
+    tooltip: {
+        position: 'absolute',
+        zIndex: 100,
+        alignItems: 'center',
+        width: 100,
+    },
+    tooltipContent: {
+        backgroundColor: '#1E293B',
+        borderRadius: 8,
+        paddingVertical: 6,
+        paddingHorizontal: 8,
+        flexDirection: 'row',
+        alignItems: 'center',
+        // Shadow for depth
+        shadowColor: '000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 6,
+        elevation: 10,
+    },
+    tooltipLabel: {
+        color: '#F8FAFC',
+        fontSize: 10,
+        fontWeight: '700',
+    },
+    tooltipDivider: {
+        width: 1,
+        height: 10,
+        backgroundColor: '#475569',
+        marginHorizontal: 6,
+    },
+    tooltipArrow: {
+        width: 0,
+        height: 0,
+        borderLeftWidth: 6,
+        borderRightWidth: 6,
+        borderTopWidth: 6,
+        borderLeftColor: 'transparent',
+        borderRightColor: 'transparent',
+        borderTopColor: '#1E293B',
     },
 });
 
