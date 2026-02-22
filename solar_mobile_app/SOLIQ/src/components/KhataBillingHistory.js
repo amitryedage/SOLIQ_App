@@ -107,7 +107,16 @@ const KhataBillingHistory = () => {
                         index !== historyData.length - 1 && styles.rowBorder,
                         {
                             opacity: rowOpacities[index],
-                            transform: [{ translateY: rowTranslations[index] }]
+                            transform: [
+                                { translateY: rowTranslations[index] },
+                                { perspective: 1000 },
+                                {
+                                    rotateX: rowOpacities[index].interpolate({
+                                        inputRange: [0, 1],
+                                        outputRange: ['30deg', '0deg']
+                                    })
+                                }
+                            ]
                         }
                     ]}
                 >

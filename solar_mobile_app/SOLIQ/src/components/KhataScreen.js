@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView, Platform, Animated } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView, Platform, Animated, Dimensions } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import KhataEnergyChart from './KhataEnergyChart';
@@ -48,6 +49,9 @@ const KhataScreen = () => {
     // Advanced: Breathing Icons Animation
     const breatheAnim = useRef(new Animated.Value(1)).current;
 
+    // Advanced: Shimmer Animation
+    const shimmerAnim = useRef(new Animated.Value(-1)).current;
+
     useEffect(() => {
         Animated.loop(
             Animated.sequence([
@@ -81,8 +85,22 @@ const KhataScreen = () => {
         });
 
         // Trigger them with a 150ms stagger
-        Animated.stagger(150, animations).start();
+        Animated.stagger(150, animations).start(() => {
+            // After entry animations, run the shimmer once
+            setTimeout(() => {
+                Animated.timing(shimmerAnim, {
+                    toValue: 1,
+                    duration: 1000,
+                    useNativeDriver: true,
+                }).start();
+            }, 500);
+        });
     }, []);
+
+    const shimmerTranslate = shimmerAnim.interpolate({
+        inputRange: [-1, 1],
+        outputRange: [-Dimensions.get('window').width, Dimensions.get('window').width]
+    });
 
     return (
         <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -98,54 +116,72 @@ const KhataScreen = () => {
                 </View>
 
                 {/* Summary Metrics Cards */}
-                <View style={styles.metricsContainer}>
-                    <Animated.View style={[styles.metricCard, {
-                        backgroundColor: '#FFF5E6',
-                        opacity: cardOpacities[0],
-                        transform: [{ translateY: cardTranslations[0] }]
-                    }]}>
-                        <View style={styles.metricHeader}>
-                            <Animated.View style={{ transform: [{ scale: breatheAnim }] }}>
-                                <Ionicons name="cash-outline" size={14} color="#F59E0B" />
-                            </Animated.View>
-                            <Text style={styles.metricLabel}>Current Bill</Text>
-                        </View>
-                        <Text style={[styles.metricValue, { color: '#0F172A' }]}>
-                            <AnimatedNumber value={0} delay={400} prefix="₹" />
-                        </Text>
+                <View style={styles.metricsWrapper}>
+                    <View style={styles.metricsContainer}>
+                        <Animated.View style={[styles.metricCard, {
+                            backgroundColor: '#FFF5E6',
+                            opacity: cardOpacities[0],
+                            transform: [{ translateY: cardTranslations[0] }]
+                        }]}>
+                            <View style={styles.metricHeader}>
+                                <Animated.View style={{ transform: [{ scale: breatheAnim }] }}>
+                                    <Ionicons name="cash-outline" size={14} color="#F59E0B" />
+                                </Animated.View>
+                                <Text style={styles.metricLabel}>Current Bill</Text>
+                            </View>
+                            <Text style={[styles.metricValue, { color: '#0F172A' }]}>
+                                <AnimatedNumber value={0} delay={400} prefix="₹" />
+                            </Text>
+                        </Animated.View>
+
+                        <Animated.View style={[styles.metricCard, {
+                            backgroundColor: '#E0F2FE',
+                            opacity: cardOpacities[1],
+                            transform: [{ translateY: cardTranslations[1] }]
+                        }]}>
+                            <View style={styles.metricHeader}>
+                                <Animated.View style={{ transform: [{ scale: breatheAnim }] }}>
+                                    <Ionicons name="trending-up-outline" size={14} color="#059669" />
+                                </Animated.View>
+                                <Text style={styles.metricLabel}>Total Savings</Text>
+                            </View>
+                            <Text style={[styles.metricValue, { color: '#0F172A' }]}>
+                                <AnimatedNumber value={22735} delay={550} prefix="₹" />
+                            </Text>
+                        </Animated.View >
+
+                        <Animated.View style={[styles.metricCard, {
+                            backgroundColor: '#EEF2FF',
+                            opacity: cardOpacities[2],
+                            transform: [{ translateY: cardTranslations[2] }]
+                        }]}>
+                            <View style={styles.metricHeader}>
+                                <Animated.View style={{ transform: [{ scale: breatheAnim }] }}>
+                                    <Ionicons name="calculator-outline" size={14} color="#6366F1" />
+                                </Animated.View>
+                                <Text style={styles.metricLabel}>Avg Monthly Bill</Text>
+                            </View>
+                            <Text style={[styles.metricValue, { color: '#0F172A' }]}>
+                                <AnimatedNumber value={2037} delay={700} prefix="₹" />
+                            </Text>
+                        </Animated.View >
+                    </View>
+
+                    {/* Shimmer Overlay */}
+                    <Animated.View
+                        style={[
+                            styles.shimmerOverlay,
+                            { transform: [{ translateX: shimmerTranslate }] }
+                        ]}
+                        pointerEvents="none"
+                    >
+                        <LinearGradient
+                            colors={['transparent', 'rgba(255,255,255,0.4)', 'transparent']}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 0 }}
+                            style={{ flex: 1 }}
+                        />
                     </Animated.View>
-
-                    <Animated.View style={[styles.metricCard, {
-                        backgroundColor: '#E0F2FE',
-                        opacity: cardOpacities[1],
-                        transform: [{ translateY: cardTranslations[1] }]
-                    }]}>
-                        <View style={styles.metricHeader}>
-                            <Animated.View style={{ transform: [{ scale: breatheAnim }] }}>
-                                <Ionicons name="trending-up-outline" size={14} color="#059669" />
-                            </Animated.View>
-                            <Text style={styles.metricLabel}>Total Savings</Text>
-                        </View>
-                        <Text style={[styles.metricValue, { color: '#0F172A' }]}>
-                            <AnimatedNumber value={22735} delay={550} prefix="₹" />
-                        </Text>
-                    </Animated.View >
-
-                    <Animated.View style={[styles.metricCard, {
-                        backgroundColor: '#EEF2FF',
-                        opacity: cardOpacities[2],
-                        transform: [{ translateY: cardTranslations[2] }]
-                    }]}>
-                        <View style={styles.metricHeader}>
-                            <Animated.View style={{ transform: [{ scale: breatheAnim }] }}>
-                                <Ionicons name="calculator-outline" size={14} color="#6366F1" />
-                            </Animated.View>
-                            <Text style={styles.metricLabel}>Avg Monthly Bill</Text>
-                        </View>
-                        <Text style={[styles.metricValue, { color: '#0F172A' }]}>
-                            <AnimatedNumber value={2037} delay={700} prefix="₹" />
-                        </Text>
-                    </Animated.View >
                 </View >
 
                 {/* Energy Chart Component */}
@@ -220,6 +256,18 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontWeight: '800',
         letterSpacing: -0.5,
+    },
+    metricsWrapper: {
+        position: 'relative',
+        overflow: 'hidden',
+        marginBottom: 20,
+    },
+    shimmerOverlay: {
+        position: 'absolute',
+        top: 0,
+        bottom: 0,
+        width: 100,
+        opacity: 0.5,
     },
 });
 

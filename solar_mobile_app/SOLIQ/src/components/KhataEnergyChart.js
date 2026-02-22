@@ -20,26 +20,30 @@ const KhataEnergyChart = () => {
 
     const MAX_VALUE = 600;
 
-    // Animation
-    const chartProgress = useRef(new Animated.Value(0)).current;
+    // Animation - Sequential Bar Growth
+    const barProgresses = useRef(data.map(() => new Animated.Value(0))).current;
     const baseLineAnim = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
-        Animated.parallel([
-            Animated.timing(baseLineAnim, {
-                toValue: 1,
-                duration: 600,
-                easing: Easing.out(Easing.cubic),
-                useNativeDriver: false,
-            }),
-            Animated.timing(chartProgress, {
-                toValue: 1,
-                duration: 800,
-                delay: 400, // Let the base line draw slightly first
-                easing: Easing.out(Easing.cubic),
-                useNativeDriver: false, // SVG height/y must not use native driver
-            })
-        ]).start();
+        // First draw the base line
+        Animated.timing(baseLineAnim, {
+            toValue: 1,
+            duration: 600,
+            easing: Easing.out(Easing.cubic),
+            useNativeDriver: false,
+        }).start(() => {
+            // Then stagger the bar growth
+            const barAnimations = barProgresses.map((progress) => {
+                return Animated.timing(progress, {
+                    toValue: 1,
+                    duration: 800,
+                    easing: Easing.out(Easing.cubic),
+                    useNativeDriver: false,
+                });
+            });
+
+            Animated.stagger(200, barAnimations).start();
+        });
     }, []);
 
     const animatedBaseLineOffset = baseLineAnim.interpolate({
@@ -97,21 +101,22 @@ const KhataEnergyChart = () => {
                             const groupX = index * (groupWidth + groupPadding);
                             const genHeight = (item.gen / MAX_VALUE) * CHART_HEIGHT;
                             const conHeight = (item.con / MAX_VALUE) * CHART_HEIGHT;
+                            const currentProgress = barProgresses[index];
 
-                            const animatedGenHeight = chartProgress.interpolate({
+                            const animatedGenHeight = currentProgress.interpolate({
                                 inputRange: [0, 1],
                                 outputRange: [0, genHeight]
                             });
-                            const animatedGenY = chartProgress.interpolate({
+                            const animatedGenY = currentProgress.interpolate({
                                 inputRange: [0, 1],
                                 outputRange: [CHART_HEIGHT, CHART_HEIGHT - genHeight]
                             });
 
-                            const animatedConHeight = chartProgress.interpolate({
+                            const animatedConHeight = currentProgress.interpolate({
                                 inputRange: [0, 1],
                                 outputRange: [0, conHeight]
                             });
-                            const animatedConY = chartProgress.interpolate({
+                            const animatedConY = currentProgress.interpolate({
                                 inputRange: [0, 1],
                                 outputRange: [CHART_HEIGHT, CHART_HEIGHT - conHeight]
                             });
