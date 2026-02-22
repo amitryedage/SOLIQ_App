@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Dimensions, Animated, Easing } from 'react-nati
 import Svg, { Rect, Line, Text as SvgText } from 'react-native-svg';
 
 const AnimatedRect = Animated.createAnimatedComponent(Rect);
+const AnimatedLine = Animated.createAnimatedComponent(Line);
 
 const { width } = Dimensions.get('window');
 const CHART_WIDTH = width - 80;
@@ -21,15 +22,30 @@ const KhataEnergyChart = () => {
 
     // Animation
     const chartProgress = useRef(new Animated.Value(0)).current;
+    const baseLineAnim = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
-        Animated.timing(chartProgress, {
-            toValue: 1,
-            duration: 800,
-            easing: Easing.out(Easing.cubic),
-            useNativeDriver: false, // SVG height/y must not use native driver
-        }).start();
+        Animated.parallel([
+            Animated.timing(baseLineAnim, {
+                toValue: 1,
+                duration: 600,
+                easing: Easing.out(Easing.cubic),
+                useNativeDriver: false,
+            }),
+            Animated.timing(chartProgress, {
+                toValue: 1,
+                duration: 800,
+                delay: 400, // Let the base line draw slightly first
+                easing: Easing.out(Easing.cubic),
+                useNativeDriver: false, // SVG height/y must not use native driver
+            })
+        ]).start();
     }, []);
+
+    const animatedBaseLineOffset = baseLineAnim.interpolate({
+        inputRange: [0, 1],
+        outputRange: [CHART_WIDTH, 0]
+    });
 
     // Group width calculations
     const numGroups = data.length;
@@ -65,7 +81,16 @@ const KhataEnergyChart = () => {
                         <Line x1="0" y1={CHART_HEIGHT * 0.83} x2={CHART_WIDTH} y2={CHART_HEIGHT * 0.83} stroke="#F1F5F9" strokeWidth="1" strokeDasharray="4 4" />
 
                         {/* Solid Base Line */}
-                        <Line x1="0" y1={CHART_HEIGHT} x2={CHART_WIDTH} y2={CHART_HEIGHT} stroke="#CBD5E1" strokeWidth="1.5" />
+                        <AnimatedLine
+                            x1="0"
+                            y1={CHART_HEIGHT}
+                            x2={CHART_WIDTH}
+                            y2={CHART_HEIGHT}
+                            stroke="#CBD5E1"
+                            strokeWidth="1.5"
+                            strokeDasharray={CHART_WIDTH}
+                            strokeDashoffset={animatedBaseLineOffset}
+                        />
 
                         {/* Bars and Labels */}
                         {data.map((item, index) => {
