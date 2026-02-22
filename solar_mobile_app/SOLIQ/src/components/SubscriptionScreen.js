@@ -116,6 +116,8 @@ const SubscriptionScreen = () => {
     ]).current;
 
     const shimmerAnim = useRef(new Animated.Value(0)).current;
+    const scaleAnim = useRef(new Animated.Value(1)).current;
+    const floatAnim = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
         // Continuous Floating Animation
