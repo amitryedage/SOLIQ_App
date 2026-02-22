@@ -1,9 +1,33 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView, Platform, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import KhataEnergyChart from './KhataEnergyChart';
 import KhataBillingHistory from './KhataBillingHistory';
+
+const AnimatedNumber = ({ value, duration = 2000, delay = 0, prefix = '' }) => {
+    const [displayValue, setDisplayValue] = useState(0);
+    const animatedValue = useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+        const listenerId = animatedValue.addListener(({ value }) => {
+            setDisplayValue(Math.floor(value));
+        });
+
+        Animated.timing(animatedValue, {
+            toValue: value,
+            duration: duration,
+            delay: delay,
+            useNativeDriver: false, // Must be false for listeners on numbers
+        }).start();
+
+        return () => {
+            animatedValue.removeListener(listenerId);
+        };
+    }, [value]);
+
+    return <Text>{prefix}{displayValue.toLocaleString()}</Text>;
+};
 
 const KhataScreen = () => {
     const insets = useSafeAreaInsets();
@@ -86,7 +110,9 @@ const KhataScreen = () => {
                             </Animated.View>
                             <Text style={styles.metricLabel}>Current Bill</Text>
                         </View>
-                        <Text style={[styles.metricValue, { color: '#0F172A' }]}>₹0</Text>
+                        <Text style={[styles.metricValue, { color: '#0F172A' }]}>
+                            <AnimatedNumber value={0} delay={400} prefix="₹" />
+                        </Text>
                     </Animated.View>
 
                     <Animated.View style={[styles.metricCard, {
@@ -100,8 +126,10 @@ const KhataScreen = () => {
                             </Animated.View>
                             <Text style={styles.metricLabel}>Total Savings</Text>
                         </View>
-                        <Text style={[styles.metricValue, { color: '#0F172A' }]}>₹22735</Text>
-                    </Animated.View>
+                        <Text style={[styles.metricValue, { color: '#0F172A' }]}>
+                            <AnimatedNumber value={22735} delay={550} prefix="₹" />
+                        </Text>
+                    </Animated.View >
 
                     <Animated.View style={[styles.metricCard, {
                         backgroundColor: '#EEF2FF',
@@ -114,18 +142,20 @@ const KhataScreen = () => {
                             </Animated.View>
                             <Text style={styles.metricLabel}>Avg Monthly Bill</Text>
                         </View>
-                        <Text style={[styles.metricValue, { color: '#0F172A' }]}>₹2037</Text>
-                    </Animated.View>
-                </View>
+                        <Text style={[styles.metricValue, { color: '#0F172A' }]}>
+                            <AnimatedNumber value={2037} delay={700} prefix="₹" />
+                        </Text>
+                    </Animated.View >
+                </View >
 
                 {/* Energy Chart Component */}
-                <KhataEnergyChart />
+                < KhataEnergyChart />
 
                 {/* Billing History Section */}
-                <KhataBillingHistory />
+                < KhataBillingHistory />
 
-            </ScrollView>
-        </View>
+            </ScrollView >
+        </View >
     );
 };
 
