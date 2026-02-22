@@ -1,8 +1,36 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useState, useRef, useEffect } from 'react';
+import { View, Text, StyleSheet, Animated, Easing } from 'react-native';
 import { Ionicons, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 
-const CarbonMetricCard = ({ title, value, unit, icon, iconType, iconColor, bgColor, trend }) => {
+// --- INTERACTIVE TICKER ---
+const AnimatedNumber = ({ value, duration = 1500, delay = 0, units = '', prefix = '' }) => {
+    const [displayValue, setDisplayValue] = useState(0);
+    const animatedValue = useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+        Animated.timing(animatedValue, {
+            toValue: parseFloat(value),
+            duration: duration,
+            delay: delay,
+            easing: Easing.out(Easing.cubic),
+            useNativeDriver: false,
+        }).start();
+
+        const listener = animatedValue.addListener(({ value }) => {
+            setDisplayValue(value);
+        });
+
+        return () => animatedValue.removeListener(listener);
+    }, [value]);
+
+    const formattedValue = typeof value === 'string' && value.includes('.')
+        ? displayValue.toFixed(1)
+        : Math.floor(displayValue).toLocaleString();
+
+    return <Text>{prefix}{formattedValue}{units}</Text>;
+};
+
+const CarbonMetricCard = ({ title, value, unit, icon, iconType, iconColor, bgColor, trend, delay = 0 }) => {
     return (
         <View style={[styles.container, { backgroundColor: bgColor || '#fff' }]}>
             <View style={styles.header}>
@@ -14,7 +42,9 @@ const CarbonMetricCard = ({ title, value, unit, icon, iconType, iconColor, bgCol
                 <Text style={styles.title}>{title}</Text>
             </View>
             <View style={styles.valueRow}>
-                <Text style={styles.value}>{value}</Text>
+                <Text style={styles.value}>
+                    <AnimatedNumber value={value} delay={delay} />
+                </Text>
                 <Text style={styles.unit}>{unit}</Text>
                 {trend && (
                     <View style={styles.trendBadge}>
@@ -36,8 +66,11 @@ const styles = StyleSheet.create({
         elevation: 1,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.05,
-        shadowRadius: 2,
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.8)',
+        overflow: 'hidden',
     },
     header: {
         flexDirection: 'row',

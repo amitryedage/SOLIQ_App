@@ -1,6 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, Dimensions, PanResponder, Animated } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, PanResponder, Animated, Easing } from 'react-native';
 import Svg, { Path, Line, Circle, Defs, LinearGradient, Stop, G, Text as SvgText } from 'react-native-svg';
+
+const AnimatedPath = Animated.createAnimatedComponent(Path);
+
 
 const { width } = Dimensions.get('window');
 const CHART_WIDTH = width - 70;
@@ -11,14 +14,23 @@ const CarbonOffsetChart = () => {
     const tooltipOpacity = useRef(new Animated.Value(0)).current;
     const tooltipX = useRef(new Animated.Value(0)).current;
     const entryAnim = useRef(new Animated.Value(0)).current;
+    const lineDrawingAnim = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
-        // Entry animation for the chart
+        // Entry animation for the container
         Animated.timing(entryAnim, {
             toValue: 1,
             duration: 800,
             useNativeDriver: true,
-        }).start();
+        }).start(() => {
+            // After container enters, draw the path
+            Animated.timing(lineDrawingAnim, {
+                toValue: 1,
+                duration: 1500,
+                easing: Easing.bezier(0.4, 0, 0.2, 1),
+                useNativeDriver: false, // strokeDashoffset doesn't support native driver in most RN SVG versions
+            }).start();
+        });
     }, []);
 
     // Calculate actual pixel 'y' based on the Y-Axis max (600)
@@ -115,25 +127,39 @@ const CarbonOffsetChart = () => {
                             </LinearGradient>
                         </Defs>
 
-                        {/* Grid Lines */}
-                        <Line x1="0" y1="0" x2={CHART_WIDTH} y2="0" stroke="rgba(0,0,0,0.04)" strokeWidth="1" strokeDasharray="3 3" />
-                        <Line x1="0" y1={CHART_HEIGHT / 2} x2={CHART_WIDTH} y2={CHART_HEIGHT / 2} stroke="rgba(0,0,0,0.04)" strokeWidth="1" strokeDasharray="3 3" />
-                        <Line x1="0" y1={CHART_HEIGHT} x2={CHART_WIDTH} y2={CHART_HEIGHT} stroke="rgba(0,0,0,0.04)" strokeWidth="1" />
+                        {/* Define Path Length for Drawing - roughly calculate length based on segments */}
+                        {/* For simplicity we use a large fixed value or just animate the dashoffset */}
+                        {/* CHART_WIDTH * 1.5 is usually safe for this complexity */}
+                        <G>
+                            {/* Grid Lines */}
+                            <Line x1="0" y1="0" x2={CHART_WIDTH} y2="0" stroke="rgba(0,0,0,0.04)" strokeWidth="1" strokeDasharray="3 3" />
+                            <Line x1="0" y1={CHART_HEIGHT / 2} x2={CHART_WIDTH} y2={CHART_HEIGHT / 2} stroke="rgba(0,0,0,0.04)" strokeWidth="1" strokeDasharray="3 3" />
+                            <Line x1="0" y1={CHART_HEIGHT} x2={CHART_WIDTH} y2={CHART_HEIGHT} stroke="rgba(0,0,0,0.04)" strokeWidth="1" />
+                        </G>
 
-                        {/* Area Fill */}
-                        <Path
+                        {/* Area Fill - using Animated path to fade in or grow with line */}
+                        <AnimatedPath
                             d={`${pathData} L ${CHART_WIDTH} ${CHART_HEIGHT} L 0 ${CHART_HEIGHT} Z`}
                             fill="url(#gradient)"
+                            opacity={lineDrawingAnim.interpolate({
+                                inputRange: [0.7, 1],
+                                outputRange: [0, 1]
+                            })}
                         />
 
-                        {/* Line Plot */}
-                        <Path
+                        {/* Line Plot with Path Drawing Effect */}
+                        <AnimatedPath
                             d={pathData}
                             fill="none"
                             stroke="url(#lineGrad)"
                             strokeWidth="3"
                             strokeLinecap="round"
                             strokeLinejoin="round"
+                            strokeDasharray={CHART_WIDTH * 2}
+                            strokeDashoffset={lineDrawingAnim.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: [CHART_WIDTH * 2, 0]
+                            })}
                         />
 
                         {activePoint && (

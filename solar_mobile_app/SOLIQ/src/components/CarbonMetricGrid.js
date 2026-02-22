@@ -15,6 +15,7 @@ const CarbonMetricGrid = () => {
                     iconColor="#4CAF50"
                     bgColor="#F1F8F4"
                     trend="Growing"
+                    delay={400}
                 />
                 <CarbonMetricCard
                     title="Carbon Credits"
@@ -24,17 +25,19 @@ const CarbonMetricGrid = () => {
                     iconType="MCI"
                     iconColor="#4FA7D8"
                     bgColor="#F0F7FF"
+                    delay={550}
                 />
             </View>
             <View style={styles.row}>
                 <CarbonMetricCard
                     title="Marketplace Value"
-                    value="₹1474"
+                    value="1474"
                     unit=""
                     icon="gold"
                     iconType="MCI"
                     iconColor="#FFA000"
                     bgColor="#FFF8E1"
+                    delay={700}
                 />
                 <CarbonMetricCard
                     title="Trees Equivalent"
@@ -44,6 +47,7 @@ const CarbonMetricGrid = () => {
                     iconType="FA"
                     iconColor="#66BB6A"
                     bgColor="#E8F5E9"
+                    delay={850}
                 />
             </View>
         </View>

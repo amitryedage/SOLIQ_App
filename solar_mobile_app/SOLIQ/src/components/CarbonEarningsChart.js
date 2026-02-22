@@ -1,8 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, Dimensions, PanResponder, Animated } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, PanResponder, Animated, Easing } from 'react-native';
 import Svg, { Rect, Line, Defs, LinearGradient, Stop, Text as SvgText } from 'react-native-svg';
 
+const AnimatedRect = Animated.createAnimatedComponent(Rect);
 const { width } = Dimensions.get('window');
+
 const CHART_WIDTH = width - 70;
 const CHART_HEIGHT = 140;
 
@@ -11,13 +13,33 @@ const CarbonEarningsChart = () => {
     const tooltipOpacity = useRef(new Animated.Value(0)).current;
     const entryAnim = useRef(new Animated.Value(0)).current;
 
+    // Staggered Growth Anims for 5 bars
+    const barGrowthAnims = useRef([
+        new Animated.Value(0),
+        new Animated.Value(0),
+        new Animated.Value(0),
+        new Animated.Value(0),
+        new Animated.Value(0),
+    ]).current;
+
     useEffect(() => {
         Animated.timing(entryAnim, {
             toValue: 1,
             duration: 800,
             delay: 150, // Slight stagger after the line chart
             useNativeDriver: true,
-        }).start();
+        }).start(() => {
+            // After entrance, trigger domino bar growth
+            const barAnimations = barGrowthAnims.map((anim) => {
+                return Animated.timing(anim, {
+                    toValue: 1,
+                    duration: 800,
+                    easing: Easing.out(Easing.cubic),
+                    useNativeDriver: false,
+                });
+            });
+            Animated.stagger(120, barAnimations).start();
+        });
     }, []);
 
     const MAX_EARNINGS = 400;
@@ -102,13 +124,24 @@ const CarbonEarningsChart = () => {
                         {data.map((item, i) => {
                             const isActive = activeIndex === i;
                             const isDimmed = activeIndex !== null && activeIndex !== i;
+                            const growth = barGrowthAnims[i];
+
+                            const animatedHeight = growth.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: [0, item.h]
+                            });
+                            const animatedY = growth.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: [CHART_HEIGHT, CHART_HEIGHT - item.h]
+                            });
+
                             return (
-                                <Rect
+                                <AnimatedRect
                                     key={`bar-${i}`}
                                     x={i * (barWidth + spacing)}
-                                    y={CHART_HEIGHT - item.h}
+                                    y={animatedY}
                                     width={barWidth}
-                                    height={item.h}
+                                    height={animatedHeight}
                                     fill={isActive ? "url(#barGradActive)" : "url(#barGradNormal)"}
                                     opacity={isDimmed ? 0.4 : 1}
                                     rx="6" // Rounded caps
