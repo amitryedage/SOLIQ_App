@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, Animated, Easing } from 'react-native';
 import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -78,10 +78,44 @@ const AnimatedProgressBar = ({ fillPercentage, color, bg }) => {
     );
 };
 
+// --- INTERACTIVE TICKER ---
+const AnimatedNumber = ({ value, duration = 1500, delay = 0, prefix = '', suffix = '' }) => {
+    const [displayValue, setDisplayValue] = useState(0);
+    const animatedValue = useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+        Animated.timing(animatedValue, {
+            toValue: value,
+            duration: duration,
+            delay: delay,
+            easing: Easing.out(Easing.cubic),
+            useNativeDriver: false,
+        }).start();
+
+        const listener = animatedValue.addListener(({ value }) => {
+            setDisplayValue(Math.floor(value));
+        });
+
+        return () => animatedValue.removeListener(listener);
+    }, [value]);
+
+    return <Text>{prefix}{displayValue.toLocaleString()}{suffix}</Text>;
+};
+
 // --- MAIN SCREEN ---
 const SubscriptionScreen = () => {
-    const scaleAnim = useRef(new Animated.Value(1)).current;
-    const floatAnim = useRef(new Animated.Value(0)).current;
+    // V3 Advanced Entrance Animations
+    const entranceAnims = useRef([
+        new Animated.Value(0), // 0: Header
+        new Animated.Value(0), // 1: Subtitle
+        new Animated.Value(0), // 2: Current Plan Card
+        new Animated.Value(0), // 3: Compare Title
+        new Animated.Value(0), // 4: Basic Card
+        new Animated.Value(0), // 5: Premium Card
+        new Animated.Value(0), // 6: Independence Card
+    ]).current;
+
+    const shimmerAnim = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
         // Continuous Floating Animation
@@ -91,7 +125,52 @@ const SubscriptionScreen = () => {
                 Animated.timing(floatAnim, { toValue: 0, duration: 2000, easing: Easing.inOut(Easing.ease), useNativeDriver: true })
             ])
         ).start();
+
+        // Recurring Shimmer Animation
+        Animated.loop(
+            Animated.sequence([
+                Animated.delay(3000),
+                Animated.timing(shimmerAnim, { toValue: 1, duration: 1500, easing: Easing.linear, useNativeDriver: true }),
+                Animated.timing(shimmerAnim, { toValue: 0, duration: 0, useNativeDriver: true })
+            ])
+        ).start();
+
+        // Sequential Staggered Entrance
+        const entranceSequence = entranceAnims.map((anim) => {
+            return Animated.timing(anim, {
+                toValue: 1,
+                duration: 600,
+                easing: Easing.out(Easing.back(1.5)),
+                useNativeDriver: true,
+            });
+        });
+
+        Animated.stagger(120, entranceSequence).start();
     }, []);
+
+    // Animation Style Helper
+    const createEntranceStyle = (index) => {
+        const extraTransforms = [];
+        if (index === 4) { // Basic flips from left
+            extraTransforms.push({ rotateY: entranceAnims[index].interpolate({ inputRange: [0, 1], outputRange: ['15deg', '0deg'] }) });
+        } else if (index === 5) { // Premium flips from right
+            extraTransforms.push({ rotateY: entranceAnims[index].interpolate({ inputRange: [0, 1], outputRange: ['-15deg', '0deg'] }) });
+        }
+
+        return {
+            opacity: entranceAnims[index],
+            transform: [
+                { scale: entranceAnims[index].interpolate({ inputRange: [0, 1], outputRange: [0.9, 1] }) },
+                { translateY: entranceAnims[index].interpolate({ inputRange: [0, 1], outputRange: [20, 0] }) },
+                ...extraTransforms
+            ]
+        };
+    };
+
+    const shimmerTranslate = shimmerAnim.interpolate({
+        inputRange: [0, 1],
+        outputRange: [-300, 300]
+    });
 
     const handlePressIn = () => Animated.spring(scaleAnim, { toValue: 0.95, useNativeDriver: true }).start();
     const handlePressOut = () => Animated.spring(scaleAnim, { toValue: 1, friction: 3, tension: 40, useNativeDriver: true }).start();
@@ -102,7 +181,7 @@ const SubscriptionScreen = () => {
 
             <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
                 {/* Header Section */}
-                <View style={styles.header}>
+                <Animated.View style={[styles.header, createEntranceStyle(0)]}>
                     <TouchableOpacity style={styles.backButton}>
                         <Ionicons name="arrow-back" size={24} color="#1A1A1A" />
                     </TouchableOpacity>
@@ -114,12 +193,14 @@ const SubscriptionScreen = () => {
                     <TouchableOpacity style={styles.themeButton}>
                         <Ionicons name="diamond-outline" size={22} color="#F59E0B" />
                     </TouchableOpacity>
-                </View>
+                </Animated.View>
 
-                <Text style={styles.sectionSubtitle}>Unlock the full potential of your solar grid with advanced insights.</Text>
+                <Animated.View style={createEntranceStyle(1)}>
+                    <Text style={styles.sectionSubtitle}>Unlock the full potential of your solar grid with advanced insights.</Text>
+                </Animated.View>
 
                 {/* Current Plan Card (Glassmorphism) */}
-                <View style={[styles.glassCard, styles.currentPlanCard]}>
+                <Animated.View style={[styles.glassCard, styles.currentPlanCard, createEntranceStyle(2)]}>
                     <View style={styles.glassHighlight} />
                     <View style={styles.planBadgeContainer}>
                         <Text style={styles.planBadgeTextTop}>CURRENT PLAN</Text>
@@ -134,23 +215,27 @@ const SubscriptionScreen = () => {
                     </View>
 
                     <Text style={styles.priceText}>
-                        <Text style={styles.priceAmount}>₹499</Text>/month
+                        <Text style={styles.priceAmount}>
+                            <AnimatedNumber value={499} delay={800} prefix="₹" />
+                        </Text>/month
                     </Text>
 
                     <View style={styles.specsContainer}>
-                        <Text style={styles.specText}>Capacity: 5 kW</Text>
+                        <Text style={styles.specText}>Capacity: <AnimatedNumber value={5} delay={1000} suffix=" kW" /></Text>
                         <AnimatedProgressBar fillPercentage={25} color="#4CAF50" bg="rgba(76, 175, 80, 0.2)" />
                         <Text style={[styles.specText, { marginTop: 10 }]}>Support: Email (48h response)</Text>
                         <Text style={styles.specText}>SLA: 95%</Text>
                     </View>
-                </View>
+                </Animated.View>
 
                 {/* Upgrade Section */}
-                <Text style={styles.sectionTitleTop}>Compare Plans</Text>
+                <Animated.View style={createEntranceStyle(3)}>
+                    <Text style={styles.sectionTitleTop}>Compare Plans</Text>
+                </Animated.View>
 
                 <View style={styles.upgradeGrid}>
                     {/* Basic Card */}
-                    <View style={[styles.glassCard, styles.planCard, styles.basicCard]}>
+                    <Animated.View style={[styles.glassCard, styles.planCard, styles.basicCard, createEntranceStyle(4)]}>
                         <View style={styles.cardHeaderFlex}>
                             <View style={[styles.iconCircleSmall, { backgroundColor: '#E2E8F0' }]}>
                                 <FontAwesome5 name="seedling" size={10} color="#64748b" />
@@ -160,7 +245,10 @@ const SubscriptionScreen = () => {
                             </View>
                         </View>
                         <Text style={styles.cardPlanName}>Basic</Text>
-                        <Text style={styles.cardPriceText}>₹499<Text style={{ fontSize: 10 }}>/mo</Text></Text>
+                        <Text style={styles.cardPriceText}>
+                            <AnimatedNumber value={499} delay={1100} prefix="₹" />
+                            <Text style={{ fontSize: 10 }}>/mo</Text>
+                        </Text>
 
                         <View style={styles.divider} />
 
@@ -169,18 +257,24 @@ const SubscriptionScreen = () => {
                             <FeatureItem text="Daily reports" delay={200} />
                             <FeatureItem text="Email support" delay={300} />
                         </View>
-                    </View>
+                    </Animated.View>
 
                     {/* Premium Card (Highlighted) */}
-                    <View style={[styles.glassCard, styles.planCard, styles.premiumCard]}>
-                        <View style={styles.premiumGlow} />
+                    <Animated.View style={[styles.glassCard, styles.planCard, styles.premiumCard, createEntranceStyle(5)]}>
+                        <Animated.View style={[styles.premiumGlow, { opacity: entranceAnims[5] }]} />
+                        <Animated.View style={[styles.shimmer, { transform: [{ rotate: '45deg' }, { scale: 2 }, { translateX: shimmerTranslate }] }]}>
+                            <LinearGradient colors={['rgba(255,255,255,0)', 'rgba(255,255,255,0.4)', 'rgba(255,255,255,0)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ flex: 1 }} />
+                        </Animated.View>
                         <View style={styles.cardHeaderFlex}>
                             <LinearGradient colors={['#F59E0B', '#EA580C']} style={styles.iconCircleSmall}>
                                 <Ionicons name="flash" size={12} color="#fff" />
                             </LinearGradient>
                         </View>
                         <Text style={styles.cardPlanName}>Premium</Text>
-                        <Text style={[styles.cardPriceText, { color: '#EA580C' }]}>₹999<Text style={{ fontSize: 10 }}>/mo</Text></Text>
+                        <Text style={[styles.cardPriceText, { color: '#EA580C' }]}>
+                            <AnimatedNumber value={999} delay={1200} prefix="₹" />
+                            <Text style={{ fontSize: 10 }}>/mo</Text>
+                        </Text>
 
                         <View style={styles.divider} />
 
@@ -190,11 +284,11 @@ const SubscriptionScreen = () => {
                             <FeatureItem text="Priority support" delay={300} />
                             <FeatureItem text="Carbon tracking" delay={400} />
                         </View>
-                    </View>
+                    </Animated.View>
                 </View>
 
                 {/* Independence Tier Card (Floating + Spring) */}
-                <Animated.View style={{ transform: [{ scale: scaleAnim }, { translateY: floatAnim }] }}>
+                <Animated.View style={[createEntranceStyle(6), { transform: [...createEntranceStyle(6).transform, { scale: scaleAnim }, { translateY: floatAnim }] }]}>
                     <LinearGradient
                         colors={['#F3E5F5', '#E1BEE7']} // Restored original colors
                         style={[styles.glassCard, styles.independenceCard]}
@@ -202,7 +296,9 @@ const SubscriptionScreen = () => {
                         end={{ x: 1, y: 1 }}
                     >
                         {/* Shimmer overlay simulation */}
-                        <LinearGradient colors={['rgba(255,255,255,0)', 'rgba(255,255,255,0.4)', 'rgba(255,255,255,0)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.shimmer} />
+                        <Animated.View style={[styles.shimmer, { transform: [{ rotate: '45deg' }, { scale: 2 }, { translateX: shimmerTranslate }] }]}>
+                            <LinearGradient colors={['rgba(255,255,255,0)', 'rgba(255,255,255,0.4)', 'rgba(255,255,255,0)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ flex: 1 }} />
+                        </Animated.View>
 
                         <View style={styles.independenceHeaderRow}>
                             <FontAwesome5 name="rocket" size={24} color="#D81B60" style={{ marginBottom: 10 }} />
@@ -212,10 +308,13 @@ const SubscriptionScreen = () => {
                         </View>
 
                         <Text style={styles.independencePlanName}>Independence</Text>
-                        <Text style={styles.independencePriceText}>₹1999<Text style={{ fontSize: 14, color: '#D81B60' }}>/month</Text></Text>
+                        <Text style={styles.independencePriceText}>
+                            <AnimatedNumber value={1999} delay={1300} prefix="₹" />
+                            <Text style={{ fontSize: 14, color: '#D81B60' }}>/month</Text>
+                        </Text>
 
                         <View style={[styles.specsContainer, { marginBottom: 20 }]}>
-                            <Text style={styles.specText}>Capacity: Unlimited (50 kW+)</Text>
+                            <Text style={styles.specText}>Capacity: Unlimited (<AnimatedNumber value={50} delay={1500} suffix=" kW+" />)</Text>
                             <AnimatedProgressBar fillPercentage={100} color="#D81B60" bg="#F8BBD0" />
                         </View>
 
