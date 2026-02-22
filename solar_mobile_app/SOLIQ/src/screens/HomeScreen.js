@@ -12,7 +12,7 @@ import SubscriptionScreen from '../components/SubscriptionScreen';
 import KhataScreen from '../components/KhataScreen';
 
 const HomeScreen = () => {
-    const [activeTab, setActiveTab] = useState('khata');
+    const [activeTab, setActiveTab] = useState('home');
 
     const renderContent = () => {
         if (activeTab === 'home') {

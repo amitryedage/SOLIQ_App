@@ -1,45 +1,65 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, Animated } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 
 const EnergyHeader = () => {
+    const fadeAnim = useRef(new Animated.Value(0)).current;
+    const slideAnim = useRef(new Animated.Value(-20)).current;
+
+    useEffect(() => {
+        Animated.parallel([
+            Animated.timing(fadeAnim, {
+                toValue: 1,
+                duration: 500,
+                useNativeDriver: true,
+            }),
+            Animated.timing(slideAnim, {
+                toValue: 0,
+                duration: 500,
+                useNativeDriver: true,
+            })
+        ]).start();
+    }, []);
+
     return (
-        <LinearGradient
-            colors={['#7BCF93', '#4FA7D8']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.container}
-        >
-            <View style={styles.metricsRow}>
-                <View style={styles.metricSection}>
-                    <Text style={styles.label}>CURRENT GENERATION</Text>
-                    <View style={styles.valueRow}>
-                        <Text style={styles.value}>2.5</Text>
-                        <Text style={styles.unit}>kW</Text>
-                        <Ionicons name="sunny" size={20} color="#FFD700" style={styles.icon} />
+        <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
+            <LinearGradient
+                colors={['#7BCF93', '#4FA7D8']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.container}
+            >
+                <View style={styles.metricsRow}>
+                    <View style={styles.metricSection}>
+                        <Text style={styles.label}>CURRENT GENERATION</Text>
+                        <View style={styles.valueRow}>
+                            <Text style={styles.value}>2.5</Text>
+                            <Text style={styles.unit}>kW</Text>
+                            <Ionicons name="sunny" size={20} color="#FFD700" style={styles.icon} />
+                        </View>
+                        <Text style={styles.subtext}>Peak production</Text>
                     </View>
-                    <Text style={styles.subtext}>Peak production</Text>
-                </View>
 
-                <View style={styles.divider} />
+                    <View style={styles.divider} />
 
-                <View style={styles.metricSection}>
-                    <Text style={styles.label}>TODAY'S ENERGY</Text>
-                    <View style={styles.valueRow}>
-                        <Text style={styles.value}>18.3</Text>
-                        <Text style={styles.unit}>kWh</Text>
-                    </View>
-                    <View style={styles.targetRow}>
-                        <Text style={styles.targetText}>Target: 25 kWh</Text>
-                        <Text style={styles.percentageText}>73%</Text>
-                    </View>
-                    <View style={styles.progressBarBg}>
-                        <View style={[styles.progressBarFill, { width: '73%' }]} />
+                    <View style={styles.metricSection}>
+                        <Text style={styles.label}>TODAY'S ENERGY</Text>
+                        <View style={styles.valueRow}>
+                            <Text style={styles.value}>18.3</Text>
+                            <Text style={styles.unit}>kWh</Text>
+                        </View>
+                        <View style={styles.targetRow}>
+                            <Text style={styles.targetText}>Target: 25 kWh</Text>
+                            <Text style={styles.percentageText}>73%</Text>
+                        </View>
+                        <View style={styles.progressBarBg}>
+                            <View style={[styles.progressBarFill, { width: '73%' }]} />
+                        </View>
                     </View>
                 </View>
-            </View>
-        </LinearGradient>
+            </LinearGradient>
+        </Animated.View>
     );
 };
 

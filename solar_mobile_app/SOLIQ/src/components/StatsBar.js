@@ -1,18 +1,38 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, Animated } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 
 const StatsBar = () => {
+    const fadeAnim = useRef(new Animated.Value(0)).current;
+    const slideAnim = useRef(new Animated.Value(30)).current;
+
+    useEffect(() => {
+        Animated.parallel([
+            Animated.timing(fadeAnim, {
+                toValue: 1,
+                duration: 500,
+                delay: 200,
+                useNativeDriver: true,
+            }),
+            Animated.timing(slideAnim, {
+                toValue: 0,
+                duration: 500,
+                delay: 200,
+                useNativeDriver: true,
+            })
+        ]).start();
+    }, []);
+
     return (
-        <View style={styles.container}>
+        <Animated.View style={[styles.container, { opacity: fadeAnim, transform: [{ translateX: slideAnim }] }]}>
             <View style={styles.statItem}>
                 <Ionicons name="flash" size={16} color="#FBC02D" />
                 <Text style={styles.statValue}>87%</Text>
                 <Text style={styles.statLabel}>Self-consumed</Text>
             </View>
-            
+
             <View style={styles.divider} />
-            
+
             <View style={styles.statItem}>
                 <MaterialCommunityIcons name="home-variant-outline" size={16} color="#4CAF50" />
                 <Text style={styles.statValue}>4.2 kWh</Text>
@@ -26,7 +46,7 @@ const StatsBar = () => {
                 <Text style={styles.statValue}>₹487</Text>
                 <Text style={styles.statLabel}>Saved</Text>
             </View>
-        </View>
+        </Animated.View>
     );
 };
 
