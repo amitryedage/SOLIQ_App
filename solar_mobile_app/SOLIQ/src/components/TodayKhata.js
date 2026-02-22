@@ -1,8 +1,28 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import { Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 
 const TodayKhata = () => {
+    const fadeAnim = useRef(new Animated.Value(0)).current;
+    const slideAnim = useRef(new Animated.Value(20)).current;
+
+    useEffect(() => {
+        Animated.parallel([
+            Animated.timing(fadeAnim, {
+                toValue: 1,
+                duration: 500,
+                delay: 400, // Starts as soon as Header finishes
+                useNativeDriver: true,
+            }),
+            Animated.timing(slideAnim, {
+                toValue: 0,
+                duration: 500,
+                delay: 400,
+                useNativeDriver: true,
+            })
+        ]).start();
+    }, []);
+
     const data = [
         { id: 1, icon: 'wb-sunny', iconType: 'MaterialIcons', color: '#FFD700', title: 'Solar Generated', time: '11:30 AM', value: '+18.3', unit: 'kWh', progress: 0.8 },
         { id: 2, icon: 'home-flash', iconType: 'MaterialCommunityIcons', color: '#FFA000', title: 'Home Consumption', time: '11:30 AM', value: '-12.8', unit: 'kWh' },
@@ -18,7 +38,7 @@ const TodayKhata = () => {
     };
 
     return (
-        <View style={styles.container}>
+        <Animated.View style={[styles.container, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
             <View style={styles.header}>
                 <Text style={styles.title}>Today's Khata</Text>
                 <TouchableOpacity style={styles.viewHistory}>
@@ -54,7 +74,7 @@ const TodayKhata = () => {
                     </View>
                 </View>
             ))}
-        </View>
+        </Animated.View>
     );
 };
 

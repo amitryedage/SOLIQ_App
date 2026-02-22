@@ -1,7 +1,9 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, Animated } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
 import { LinearGradient } from 'expo-linear-gradient';
+
+const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
 import { Ionicons } from '@expo/vector-icons';
 
 const EnergyScore = () => {
@@ -13,10 +15,30 @@ const EnergyScore = () => {
     const circumference = 2 * Math.PI * radius;
     const strokeDashoffset = circumference * (1 - (percentage * 0.75)); // 0.75 to make it a partial circle
 
+    const fadeAnim = useRef(new Animated.Value(0)).current;
+    const slideAnim = useRef(new Animated.Value(20)).current;
+
+    useEffect(() => {
+        Animated.parallel([
+            Animated.timing(fadeAnim, {
+                toValue: 1,
+                duration: 500,
+                delay: 550, // Slightly after TodayKhata
+                useNativeDriver: true,
+            }),
+            Animated.timing(slideAnim, {
+                toValue: 0,
+                duration: 500,
+                delay: 550,
+                useNativeDriver: true,
+            })
+        ]).start();
+    }, []);
+
     return (
-        <LinearGradient
+        <AnimatedLinearGradient
             colors={['#FFFFFF', '#E8F1FF']}
-            style={styles.container}
+            style={[styles.container, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}
         >
             <View style={styles.gaugeContainer}>
                 <Svg height="150" width="150" viewBox="0 0 150 150">
@@ -69,7 +91,7 @@ const EnergyScore = () => {
                     </View>
                 ))}
             </View>
-        </LinearGradient>
+        </AnimatedLinearGradient>
     );
 };
 
