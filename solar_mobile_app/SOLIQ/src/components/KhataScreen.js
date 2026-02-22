@@ -21,7 +21,25 @@ const KhataScreen = () => {
         new Animated.Value(20)
     ]).current;
 
+    // Advanced: Breathing Icons Animation
+    const breatheAnim = useRef(new Animated.Value(1)).current;
+
     useEffect(() => {
+        Animated.loop(
+            Animated.sequence([
+                Animated.timing(breatheAnim, {
+                    toValue: 1.15,
+                    duration: 1500,
+                    useNativeDriver: true, // scale supports native driver
+                }),
+                Animated.timing(breatheAnim, {
+                    toValue: 1,
+                    duration: 1500,
+                    useNativeDriver: true,
+                })
+            ])
+        ).start();
+
         // Create an array of parallel animations (opacity + translation) for each card
         const animations = cardOpacities.map((opacity, index) => {
             return Animated.parallel([
@@ -63,7 +81,9 @@ const KhataScreen = () => {
                         transform: [{ translateY: cardTranslations[0] }]
                     }]}>
                         <View style={styles.metricHeader}>
-                            <Ionicons name="cash-outline" size={14} color="#F59E0B" />
+                            <Animated.View style={{ transform: [{ scale: breatheAnim }] }}>
+                                <Ionicons name="cash-outline" size={14} color="#F59E0B" />
+                            </Animated.View>
                             <Text style={styles.metricLabel}>Current Bill</Text>
                         </View>
                         <Text style={[styles.metricValue, { color: '#0F172A' }]}>₹0</Text>
@@ -75,7 +95,9 @@ const KhataScreen = () => {
                         transform: [{ translateY: cardTranslations[1] }]
                     }]}>
                         <View style={styles.metricHeader}>
-                            <Ionicons name="trending-up-outline" size={14} color="#059669" />
+                            <Animated.View style={{ transform: [{ scale: breatheAnim }] }}>
+                                <Ionicons name="trending-up-outline" size={14} color="#059669" />
+                            </Animated.View>
                             <Text style={styles.metricLabel}>Total Savings</Text>
                         </View>
                         <Text style={[styles.metricValue, { color: '#0F172A' }]}>₹22735</Text>
@@ -87,7 +109,9 @@ const KhataScreen = () => {
                         transform: [{ translateY: cardTranslations[2] }]
                     }]}>
                         <View style={styles.metricHeader}>
-                            <Ionicons name="calculator-outline" size={14} color="#6366F1" />
+                            <Animated.View style={{ transform: [{ scale: breatheAnim }] }}>
+                                <Ionicons name="calculator-outline" size={14} color="#6366F1" />
+                            </Animated.View>
                             <Text style={styles.metricLabel}>Avg Monthly Bill</Text>
                         </View>
                         <Text style={[styles.metricValue, { color: '#0F172A' }]}>₹2037</Text>
