@@ -30,13 +30,15 @@ const KhataEnergyChart = () => {
 
     const handlePressGroup = (index) => {
         if (selectedGroup === index) {
-            // Deselect if already selected
             hideTooltip();
         } else {
+            // New selection - provide quick visual feedback
             setSelectedGroup(index);
-            Animated.timing(tooltipAnim, {
+            tooltipAnim.setValue(0);
+            Animated.spring(tooltipAnim, {
                 toValue: 1,
-                duration: 300,
+                tension: 100,
+                friction: 10,
                 useNativeDriver: true,
             }).start();
         }
@@ -130,6 +132,16 @@ const KhataEnergyChart = () => {
                     )}
 
                     <Svg width={CHART_WIDTH} height={CHART_HEIGHT + 24}>
+                        {/* Background tap area to dismiss tooltip when clicking empty space */}
+                        <Rect
+                            x={0}
+                            y={0}
+                            width={CHART_WIDTH}
+                            height={CHART_HEIGHT + 24}
+                            fill="rgba(0,0,0,0)"
+                            onPress={hideTooltip}
+                        />
+
                         {/* Grid Lines */}
                         <Line x1="0" y1="0" x2={CHART_WIDTH} y2="0" stroke="#F1F5F9" strokeWidth="1" strokeDasharray="4 4" />
                         <Line x1="0" y1={CHART_HEIGHT * 0.33} x2={CHART_WIDTH} y2={CHART_HEIGHT * 0.33} stroke="#F1F5F9" strokeWidth="1" strokeDasharray="4 4" />
@@ -175,13 +187,13 @@ const KhataEnergyChart = () => {
 
                             return (
                                 <G key={index} onPress={() => handlePressGroup(index)}>
-                                    {/* Transparent hit area for easier tapping */}
+                                    {/* Transparent hit area for easier tapping - using rgba for better coverage */}
                                     <Rect
-                                        x={groupX - 10}
+                                        x={groupX - 5}
                                         y={0}
-                                        width={groupWidth + 20}
+                                        width={groupWidth + 10}
                                         height={CHART_HEIGHT}
-                                        fill="transparent"
+                                        fill="rgba(0,0,0,0)"
                                     />
 
                                     {/* Generated Bar (Orange) */}
