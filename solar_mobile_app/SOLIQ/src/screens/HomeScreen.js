@@ -10,6 +10,7 @@ import BottomNavbar from '../components/BottomNavbar';
 import CarbonDashboard from '../components/CarbonDashboard';
 import SubscriptionScreen from '../components/SubscriptionScreen';
 import KhataScreen from '../components/KhataScreen';
+import MarketScreen from '../components/MarketScreen';
 
 const HomeScreen = () => {
     const [activeTab, setActiveTab] = useState('khata');
@@ -43,6 +44,10 @@ const HomeScreen = () => {
             return <KhataScreen />;
         }
 
+        if (activeTab === 'market') {
+            return <MarketScreen />;
+        }
+
         return (
             <View style={styles.placeholder}>
                 <Text>{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} Section</Text>
@@ -53,7 +58,7 @@ const HomeScreen = () => {
     return (
         <SafeAreaView style={styles.safeArea}>
             <StatusBar barStyle="dark-content" />
-            <TopNavbar />
+            {activeTab !== 'market' && <TopNavbar />}
             {renderContent()}
             <BottomNavbar activeTab={activeTab} onTabPress={setActiveTab} />
         </SafeAreaView>
