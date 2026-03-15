@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { Ionicons, MaterialCommunityIcons, FontAwesome5, MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 
 const categories = ['All', 'Smart Switches', 'Inverters', 'Solar Meters', 'EV Chargers'];
 
-const products = [
+const productsData = [
     {
         id: '1',
         name: 'WiFi Smart Plug',
@@ -16,6 +16,7 @@ const products = [
         reviews: '150',
         iconType: 'MCI',
         iconName: 'power-socket-eu',
+        category: 'Smart Switches',
     },
     {
         id: '2',
@@ -28,6 +29,7 @@ const products = [
         verified: true,
         iconType: 'MCI',
         iconName: 'car-battery',
+        category: 'Inverters',
     },
     {
         id: '3',
@@ -39,6 +41,7 @@ const products = [
         reviews: '85',
         iconType: 'MCI',
         iconName: 'door-closed-lock',
+        category: 'Smart Switches',
     },
     {
         id: '4',
@@ -50,6 +53,19 @@ const products = [
         reviews: '95',
         iconType: 'MCI',
         iconName: 'counter',
+        category: 'Solar Meters',
+    },
+    {
+        id: '5',
+        name: 'EV Fast Charger',
+        desc: 'Level 2 Charging',
+        price: '24,999',
+        oldPrice: '29,999',
+        rating: '4.9',
+        reviews: '45',
+        iconType: 'MCI',
+        iconName: 'ev-station',
+        category: 'EV Chargers',
     },
 ];
 
@@ -72,6 +88,12 @@ const ProductIcon = ({ type, name, size = 60 }) => {
 };
 
 const MarketScreen = () => {
+    const [activeCategory, setActiveCategory] = useState('All');
+
+    const filteredProducts = activeCategory === 'All' 
+        ? productsData 
+        : productsData.filter(product => product.category === activeCategory);
+
     return (
         <View style={styles.container}>
             {/* Header */}
@@ -97,9 +119,10 @@ const MarketScreen = () => {
                     {categories.map((cat, index) => (
                         <TouchableOpacity 
                             key={index} 
-                            style={[styles.categoryPill, index === 0 && styles.categoryPillActive]}
+                            style={[styles.categoryPill, activeCategory === cat && styles.categoryPillActive]}
+                            onPress={() => setActiveCategory(cat)}
                         >
-                            <Text style={[styles.categoryText, index === 0 && styles.categoryTextActive]}>{cat}</Text>
+                            <Text style={[styles.categoryText, activeCategory === cat && styles.categoryTextActive]}>{cat}</Text>
                         </TouchableOpacity>
                     ))}
                     <View style={{ width: 20 }} />
@@ -130,7 +153,7 @@ const MarketScreen = () => {
 
                 {/* Product Grid */}
                 <View style={styles.productGrid}>
-                    {products.map(product => (
+                    {filteredProducts.map(product => (
                         <View key={product.id} style={styles.productCard}>
                             <ProductIcon type={product.iconType} name={product.iconName} />
                             <View style={styles.productInfo}>
@@ -159,6 +182,11 @@ const MarketScreen = () => {
                             </View>
                         </View>
                     ))}
+                    {filteredProducts.length === 0 && (
+                        <View style={{ width: '100%', alignItems: 'center', marginVertical: 20 }}>
+                            <Text style={{ color: '#888' }}>No products found in this category.</Text>
+                        </View>
+                    )}
                 </View>
 
                 {/* Trending Section */}
