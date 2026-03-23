@@ -217,7 +217,7 @@ For Path A, payment is physically linked to power delivery. Lapse in subscriptio
     ┌────────────▼──────────┐        ┌───────────────▼──────────────┐
     │ A-3: Free Hardware    │        │ B-3: Digital Energy Units    │
     │ Install + Blackout    │        │ Credited Instantly           │
-    │ Immunity Activated    │        │ (₹999/month subscription)    │
+    │ Immunity Activated    │        │    │
     │ (₹2,999/month lease)  │        └───────────────┬──────────────┘
     └────────────┬──────────┘                        │
                  └──────────────────┬────────────────┘
