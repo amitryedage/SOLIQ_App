@@ -10,9 +10,9 @@
 
 <br/>
 
-[![INSTINCT 4.0](https://img.shields.io/badge/🏆_INSTINCT_4.0-Hackathon_Submission-1a3c5e?style=for-the-badge)](https://github.com/amitryedage/SOLIQ_App)
-[![Team](https://img.shields.io/badge/👥_Team-Enelink-2d6a4f?style=for-the-badge)](https://github.com/amitryedage/SOLIQ_App)
-[![Problem Statement](https://img.shields.io/badge/⚡_PS-Energy_as_a_Service-f4a261?style=for-the-badge)](#)
+[![INSTINCT 4.0](https://img.shields.io/badge/_INSTINCT_4.0-Hackathon_Submission-1a3c5e?style=for-the-badge)](https://github.com/amitryedage/SOLIQ_App)
+[![Team](https://img.shields.io/badge/_Team-Enelink-2d6a4f?style=for-the-badge)](https://github.com/amitryedage/SOLIQ_App)
+[![Problem Statement](https://img.shields.io/badge/_PS-Energy_as_a_Service-f4a261?style=for-the-badge)](#)
 [![Platform](https://img.shields.io/badge/📱_Platform-Flutter_|_React_Native-52b788?style=for-the-badge)](#)
 [![License](https://img.shields.io/badge/📄_License-MIT-74c69d?style=for-the-badge)](LICENSE)
 
