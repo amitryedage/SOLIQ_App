@@ -550,11 +550,6 @@ The SolIQ app is organized around **5 core tabs**, shared across both user paths
 - [x] Virtual Energy Tier selection and crediting (Path B)
 - [x] Real-time inverter telemetry + battery health dial (Path A)
 
-### 🔄 In Progress
-- [ ] Razorpay live payment integration
-- [ ] Real DISCOM Smart Meter API bridge (virtual net-metering)
-- [ ] Production AWS deployment with TimescaleDB
-- [ ] Drone survey scheduling API integration
 
 ### 📅 Upcoming Milestones
 - [ ] **BEE Certification** — Bureau of Energy Efficiency hardware type-approval
