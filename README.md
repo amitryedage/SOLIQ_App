@@ -279,12 +279,9 @@ The processed intelligence is exposed via a secure API gateway connecting to: Fi
 Microcontroller    ESP32-S3              Core processing unit
 Protocol           Modbus RS485          Universal inverter communication
 Current Sensing    ACS712 Sensors        Energy metering
-Firmware           C++ (PlatformIO)      Real-time edge processing
 Tamper Protection  Built-in sensors      Detects unauthorized bypass → shuts off export
 Local Buffer       SD Card               Zero data loss during connectivity outages
-Primary Network    WiFi 2.4GHz           Cloud telemetry transmission
 Fallback Network   4G LTE (SIM module)   Automatic failover
-IoT Protocol       MQTT (Mosquitto)      Lightweight pub/sub messaging
 ```
 
 ### ☁️ Cloud & Database
