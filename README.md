@@ -2,11 +2,9 @@
 
 <br/>
 
-# ☀️ SolIQ
+#  SolIQ
 
-### **Energy-as-a-Service · Democratizing Solar for Every Indian Home**
 
-*From ₹3,00,000 upfront → to ₹0 upfront. One app. Two paths. Infinite impact.*
 
 <br/>
 
